@@ -63,6 +63,7 @@ let runeMoving = false;
 let sortConfig = null;
 let chargedTower = null;
 let chargedColor = null;
+let megaCelebration = false;
 
 function shuffled(values) {
   const copy = [...values];
@@ -107,6 +108,7 @@ function newSortGame() {
   } while (towers.slice(0, sortConfig.colors).some((tower) => new Set(tower).size === 1));
   selectedTower = null;
   runeMoving = false;
+  megaCelebration = false;
   moves = 0;
   $("#sort-level").textContent = state.sortLevel;
   $("#sort-instruction").textContent = `${sortLevelSummary(state.sortLevel)}. Attune each house to a matching shrine.`;
@@ -122,6 +124,7 @@ function renderTowers() {
   board.style.gridTemplateRows = `repeat(${rowCount}, minmax(0, 1fr))`;
   board.classList.remove("last-row-1", "last-row-2", "rows-2", "rows-3", "rows-4");
   board.classList.add(`rows-${rowCount}`);
+  board.classList.toggle("mega-complete", megaCelebration);
   const finalRowCount = towers.length % 3;
   if (finalRowCount) board.classList.add(`last-row-${finalRowCount}`);
   towers.forEach((runes, index) => {
@@ -129,8 +132,9 @@ function renderTowers() {
     const complete = runes.length === sortConfig.capacity && new Set(runes).size === 1;
     const completeColor = complete ? runes[0] : "";
     button.className = `tower${selectedTower === index ? " selected" : ""}${complete ? " complete" : ""}${completeColor ? ` ${completeColor}` : ""}${chargedTower === index ? " charged" : ""}${!runes.length ? " empty" : ""}${runes.length === sortConfig.capacity ? " full" : ""}`;
+    button.style.setProperty("--tower-index", index);
     button.setAttribute("aria-label", `Shrine ${index + 1}, ${runes.length} runes`);
-    button.innerHTML = `${chargedTower === index && chargedColor ? `<span class="symbol-burst ${chargedColor}" aria-hidden="true">${Array.from({ length: 6 }, (_, burstIndex) => `<i style="--burst-index:${burstIndex}">${runeSymbols[chargedColor]}</i>`).join("")}</span>` : ""}<span class="rune-slots" aria-hidden="true">${Array.from({ length: sortConfig.capacity }, () => "<i></i>").join("")}</span><span class="runes">${runes.map((color) =>
+    button.innerHTML = `${chargedTower === index && chargedColor ? `<span class="symbol-burst ${chargedColor}" aria-hidden="true">${Array.from({ length: 8 }, (_, burstIndex) => `<i style="--burst-index:${burstIndex}">${runeSymbols[chargedColor]}</i>`).join("")}</span>` : ""}<span class="rune-slots" aria-hidden="true">${Array.from({ length: sortConfig.capacity }, () => "<i></i>").join("")}</span><span class="runes">${runes.map((color) =>
       `<i class="rune ${color}" data-symbol="${runeSymbols[color]}"></i>`).join("")}</span>`;
     button.addEventListener("click", () => chooseTower(index));
     board.appendChild(button);
@@ -230,13 +234,16 @@ async function chooseTower(index) {
 }
 
 function winSort() {
+  megaCelebration = true;
+  renderTowers();
+  $("#towers").insertAdjacentHTML("beforeend", `<div class="mega-burst" aria-hidden="true">${sortConfig.activeColors.map((color, colorIndex) => `<span class="${color}" style="--mega-index:${colorIndex}">${runeSymbols[color]}</span>`).join("")}</div>`);
   state.gold += 75 + state.sortLevel * 25;
   state.sortWon = true;
   if (state.bestMoves === "\u2014" || moves < Number(state.bestMoves)) state.bestMoves = moves;
   state.sortLevel++;
   saveState();
   updateRealm();
-  setTimeout(() => $("#sort-message").classList.remove("hidden"), 300);
+  setTimeout(() => $("#sort-message").classList.remove("hidden"), 1400);
 }
 
 $("#restart-sort").addEventListener("click", newSortGame);
