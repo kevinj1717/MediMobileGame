@@ -8,7 +8,8 @@
     right: 356,
     top: 28,
     bottom: 548,
-    clearY: 184
+    clearY: 190,
+    spawnBottom: 486
   };
   const api = window.shatteredRealm;
   const $ = (selector) => document.querySelector(selector);
@@ -27,54 +28,116 @@
 
   function levelConfig() {
     const base = api.dragonLevelConfig(api.state.dragonLevel);
+    const design = levelDesign(api.state.dragonLevel);
     return {
       ...base,
-      targets: Math.max(5, base.targets - 1),
-      obstacles: Math.max(6, base.obstacles - 1),
+      targets: design.slots.filter((slot) => slot.target).length,
+      obstacles: design.slots.filter((slot) => !slot.target).length,
       balls: base.balls + 1
     };
   }
 
-  function generateLayout(config) {
-    const patterns = [
-      [
-        [72, 205], [318, 205],
-        [130, 270], [260, 270],
-        [76, 340], [195, 340], [314, 340],
-        [126, 420], [264, 420],
-        [92, 494], [195, 494], [298, 494]
-      ],
-      [
-        [195, 205],
-        [104, 250], [286, 250],
-        [82, 320], [195, 320], [308, 320],
-        [124, 390], [266, 390],
-        [72, 472], [195, 472], [318, 472]
-      ],
-      [
-        [91, 214], [299, 214],
-        [144, 276], [246, 276],
-        [76, 342], [195, 352], [314, 342],
-        [114, 424], [276, 424],
-        [80, 500], [195, 486], [310, 500]
-      ],
-      [
-        [120, 210], [270, 210],
-        [80, 278], [195, 284], [310, 278],
-        [118, 352], [272, 352],
-        [76, 430], [195, 430], [314, 430],
-        [128, 500], [262, 500]
-      ]
+  function wall(x, y) {
+    return { x, y, target: false };
+  }
+
+  function prize(x, y) {
+    return { x, y, target: true };
+  }
+
+  function levelDesign(level) {
+    const designs = [
+      {
+        name: "Castle Gate",
+        slots: [
+          wall(92, 222), wall(298, 222), wall(92, 278), wall(298, 278), wall(92, 334), wall(298, 334),
+          wall(132, 222), wall(174, 222), wall(216, 222), wall(258, 222),
+          prize(156, 302), prize(234, 302), prize(156, 382), prize(234, 382), prize(195, 438)
+        ]
+      },
+      {
+        name: "Dragon Head",
+        slots: [
+          wall(195, 206), wall(138, 244), wall(252, 244), wall(104, 294), wall(286, 294),
+          wall(126, 360), wall(164, 402), wall(226, 402), wall(264, 360),
+          prize(154, 296), prize(236, 296), prize(195, 350), prize(174, 450), prize(216, 450)
+        ]
+      },
+      {
+        name: "Shield Wall",
+        slots: [
+          wall(195, 204), wall(134, 232), wall(256, 232), wall(98, 290), wall(292, 290),
+          wall(120, 362), wall(270, 362), wall(158, 436), wall(232, 436),
+          prize(158, 292), prize(232, 292), prize(195, 346), prize(168, 404), prize(222, 404)
+        ]
+      },
+      {
+        name: "Broken Sword",
+        slots: [
+          wall(195, 204), wall(195, 250), wall(195, 296), wall(195, 342), wall(195, 388),
+          wall(152, 430), wall(238, 430), wall(116, 466), wall(274, 466),
+          prize(154, 250), prize(236, 250), prize(158, 342), prize(232, 342), prize(195, 462)
+        ]
+      },
+      {
+        name: "Crown Keep",
+        slots: [
+          wall(84, 292), wall(126, 238), wall(168, 292), wall(210, 238), wall(252, 292), wall(306, 238),
+          wall(92, 356), wall(142, 356), wall(192, 356), wall(242, 356), wall(292, 356),
+          prize(126, 306), prize(210, 306), prize(286, 306), prize(166, 424), prize(246, 424)
+        ]
+      },
+      {
+        name: "Twin Towers",
+        slots: [
+          wall(94, 220), wall(94, 278), wall(94, 336), wall(94, 394), wall(94, 452),
+          wall(296, 220), wall(296, 278), wall(296, 336), wall(296, 394), wall(296, 452),
+          prize(154, 260), prize(236, 260), prize(154, 362), prize(236, 362), prize(195, 452)
+        ]
+      },
+      {
+        name: "Fang Trap",
+        slots: [
+          wall(76, 224), wall(116, 288), wall(156, 352), wall(196, 416),
+          wall(314, 224), wall(274, 288), wall(234, 352), wall(194, 416),
+          wall(104, 466), wall(286, 466),
+          prize(156, 264), prize(234, 264), prize(136, 398), prize(254, 398), prize(195, 470)
+        ]
+      },
+      {
+        name: "Royal Standard",
+        slots: [
+          wall(116, 220), wall(116, 274), wall(116, 328), wall(116, 382), wall(116, 436),
+          wall(158, 230), wall(210, 250), wall(262, 270), wall(210, 310), wall(158, 330),
+          prize(196, 282), prize(242, 292), prize(164, 394), prize(220, 426), prize(284, 456)
+        ]
+      },
+      {
+        name: "Moon Gate",
+        slots: [
+          wall(195, 204), wall(136, 228), wall(254, 228), wall(100, 286), wall(290, 286),
+          wall(100, 358), wall(290, 358), wall(136, 426), wall(254, 426), wall(195, 454),
+          prize(156, 304), prize(234, 304), prize(154, 386), prize(236, 386), prize(195, 346)
+        ]
+      },
+      {
+        name: "Dragon Throne",
+        slots: [
+          wall(96, 236), wall(294, 236), wall(126, 306), wall(264, 306), wall(104, 376), wall(286, 376),
+          wall(146, 446), wall(194, 446), wall(242, 446), wall(194, 214),
+          prize(154, 274), prize(236, 274), prize(166, 374), prize(224, 374), prize(195, 404)
+        ]
+      }
     ];
-    const pattern = patterns[(api.state.dragonLevel - 1) % patterns.length];
-    const slots = pattern.map(([x, y]) => ({
-      x: Phaser.Math.Clamp(x + Phaser.Math.Between(-7, 7), playfield.left + 22, playfield.right - 22),
-      y: Math.max(playfield.clearY, y + Phaser.Math.Between(-6, 6))
-    }));
-    Phaser.Utils.Array.Shuffle(slots);
-    return slots.slice(0, config.targets + config.obstacles).map((slot, index) => ({
+    return designs[(level - 1) % designs.length];
+  }
+
+  function generateLayout() {
+    const design = levelDesign(api.state.dragonLevel);
+    return design.slots.map((slot) => ({
       ...slot,
-      target: index < config.targets
+      x: Phaser.Math.Clamp(slot.x, playfield.left + 18, playfield.right - 18),
+      y: Phaser.Math.Clamp(slot.y, playfield.clearY, playfield.spawnBottom)
     }));
   }
 
@@ -188,12 +251,12 @@
 
       const config = levelConfig();
       this.ballsLeft = config.balls;
-      const layout = generateLayout(config);
+      const layout = generateLayout();
       layout.forEach((slot) => {
         const key = slot.target ? "shieldIntact" : "relic";
         const sprite = this.add.image(slot.x, slot.y, key)
           .setDepth(slot.y)
-          .setScale(slot.target ? .148 : .098);
+          .setScale(slot.target ? .118 : .078);
         sprite.setPipeline("Light2D");
         this.tweens.add({
           targets: sprite,
@@ -206,7 +269,7 @@
         this.pegs.push({
           x: slot.x,
           y: slot.y,
-          r: slot.target ? 20 : 14,
+          r: slot.target ? 16 : 11,
           target: slot.target,
           hp: slot.target ? config.targetHp : 1,
           hit: false,
@@ -224,7 +287,9 @@
       $("#targets-left").textContent = this.pegs.filter((peg) => peg.target && !peg.hit).length;
       $("#dragon-score").textContent = this.score;
       $("#dragon-level").textContent = api.state.dragonLevel;
-      $("#dragon-instruction").textContent = `${api.dragonLevelSummary(api.state.dragonLevel)}. Hold to charge, drag to aim, release to burn.`;
+      const design = levelDesign(api.state.dragonLevel);
+      const config = levelConfig();
+      $("#dragon-instruction").textContent = `${design.name}: ${config.targets} shields hidden behind ${config.obstacles} relic walls. Hold to charge, drag to aim, release to burn.`;
     }
 
     startCharge(pointer) {
@@ -295,11 +360,11 @@
       const dy = Math.max(48, this.aim.y - launcher.y);
       const len = Math.hypot(dx, dy) || 1;
       const speed = 2.35 + power * 2.35;
-      this.ball = this.add.image(launcher.x, launcher.y, "fireball").setScale(.105).setDepth(999);
+      this.ball = this.add.image(launcher.x, launcher.y, "fireball").setScale(.095).setDepth(999);
       this.ball.setPipeline("Light2D");
       this.ball.vx = dx / len * speed;
       this.ball.vy = dy / len * speed;
-      this.ball.r = 10;
+      this.ball.r = 9;
       this.ball.frames = 0;
       this.ballsLeft--;
       this.aiming = false;
@@ -404,7 +469,7 @@
       const burst = this.add.image(peg.x, peg.y, burstKey).setScale(.08).setAlpha(.95).setDepth(1200);
       this.tweens.add({
         targets: burst,
-        scale: peg.target ? .26 : .18,
+        scale: peg.target ? .22 : .15,
         alpha: 0,
         duration: 520,
         ease: "Cubic.Out",
@@ -415,7 +480,7 @@
 
       if (peg.target && !destroyed) {
         peg.sprite.setTexture("shieldCracked");
-        this.tweens.add({ targets: peg.sprite, scale: .166, yoyo: true, duration: 110, ease: "Back.Out" });
+        this.tweens.add({ targets: peg.sprite, scale: .132, yoyo: true, duration: 110, ease: "Back.Out" });
       } else if (destroyed) {
         peg.hit = true;
         peg.sprite.setTexture(peg.target ? "shieldShattered" : "relic");
@@ -429,7 +494,7 @@
           onComplete: () => peg.sprite.setVisible(false)
         });
       } else {
-        this.tweens.add({ targets: peg.sprite, scale: .112, yoyo: true, duration: 110, ease: "Back.Out" });
+        this.tweens.add({ targets: peg.sprite, scale: .09, yoyo: true, duration: 110, ease: "Back.Out" });
       }
       this.updateStats();
     }
