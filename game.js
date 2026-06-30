@@ -114,6 +114,9 @@ function renderTowers() {
   const board = $("#towers");
   board.innerHTML = "";
   board.style.gridTemplateRows = `repeat(${Math.ceil(towers.length / 3)}, minmax(0, 1fr))`;
+  board.classList.remove("last-row-1", "last-row-2");
+  const finalRowCount = towers.length % 3;
+  if (finalRowCount) board.classList.add(`last-row-${finalRowCount}`);
   towers.forEach((runes, index) => {
     const button = document.createElement("button");
     const complete = runes.length === sortConfig.capacity && new Set(runes).size === 1;
