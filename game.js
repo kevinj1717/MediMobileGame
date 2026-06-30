@@ -1,9 +1,11 @@
-const state = {
+﻿const state = {
   gold: Number(localStorage.getItem("realmGold") || 0),
   embers: Number(localStorage.getItem("realmEmbers") || 0),
   sortWon: localStorage.getItem("sortWon") === "true",
   dragonWon: localStorage.getItem("dragonWon") === "true",
-  bestMoves: localStorage.getItem("bestMoves") || "—"
+  bestMoves: localStorage.getItem("bestMoves") || "\u2014",
+  sortLevel: Number(localStorage.getItem("sortLevel") || 1),
+  dragonLevel: Number(localStorage.getItem("dragonLevel") || 1)
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -15,17 +17,26 @@ function saveState() {
   localStorage.setItem("sortWon", state.sortWon);
   localStorage.setItem("dragonWon", state.dragonWon);
   localStorage.setItem("bestMoves", state.bestMoves);
+  localStorage.setItem("sortLevel", state.sortLevel);
+  localStorage.setItem("dragonLevel", state.dragonLevel);
 }
 
 function updateRealm() {
+  const renown = Math.max(1, Math.floor((state.sortLevel + state.dragonLevel) / 2));
+  $("#renown").textContent = renown;
   $("#gold").textContent = state.gold;
   $("#embers").textContent = state.embers;
   $("#best-moves").textContent = state.bestMoves;
-  const progress = (state.sortWon ? 34 : 0) + (state.dragonWon ? 33 : 0);
+  const progress = Math.min(100, ((state.sortLevel - 1) * 8) + ((state.dragonLevel - 1) * 8) + (state.sortWon ? 15 : 0) + (state.dragonWon ? 15 : 0));
   $("#restore-percent").textContent = `${progress}%`;
   $("#restore-bar").style.width = `${progress}%`;
   $("#milestone-1").classList.toggle("complete", progress >= 34);
   $("#milestone-2").classList.toggle("complete", progress >= 67);
+  $("#milestone-3").classList.toggle("complete", progress >= 100);
+  $("#sort-tier").textContent = `Trial I \u00b7 Level ${state.sortLevel}`;
+  $("#dragon-tier").textContent = `Trial II \u00b7 Level ${state.dragonLevel}`;
+  $("#sort-preview").textContent = sortLevelSummary(state.sortLevel);
+  $("#dragon-preview").textContent = dragonLevelSummary(state.dragonLevel);
 }
 
 function showScreen(id) {
@@ -40,12 +51,13 @@ document.addEventListener("click", (event) => {
 });
 
 // Rune sorting
-const runeColors = ["red", "blue", "gold", "green"];
-const runeSymbols = { red: "◆", blue: "❄", gold: "☀", green: "♧" };
+const runeColors = ["red", "blue", "gold", "green", "violet", "white", "crimson"];
+const runeSymbols = { red: "\u25c6", blue: "\u2744", gold: "\u2600", green: "\u2667", violet: "\u2726", white: "\u2727", crimson: "\u2739" };
 let towers = [];
 let selectedTower = null;
 let moves = 0;
 let runeMoving = false;
+let sortConfig = null;
 
 function shuffled(values) {
   const copy = [...values];
@@ -56,16 +68,43 @@ function shuffled(values) {
   return copy;
 }
 
+function sortLevelConfig(level) {
+  const colors = Math.min(7, 4 + Math.floor((level - 1) / 2));
+  const emptyTowers = level >= 6 ? 3 : 2;
+  return {
+    level,
+    colors,
+    emptyTowers,
+    capacity: 4,
+    activeColors: runeColors.slice(0, colors)
+  };
+}
+
+function sortLevelSummary(level) {
+  const config = sortLevelConfig(level);
+  return `${config.colors} rune houses \u00b7 ${config.colors + config.emptyTowers} towers`;
+}
+
+function dragonLevelSummary(level) {
+  const config = dragonLevelConfig(level);
+  return `${config.targets} shields \u00b7 ${config.obstacles} relics \u00b7 ${config.balls} fireballs`;
+}
+
 function newSortGame() {
   if (runeMoving) return;
+  sortConfig = sortLevelConfig(state.sortLevel);
   let pile;
   do {
-    pile = shuffled(runeColors.flatMap((color) => Array(4).fill(color)));
-    towers = [pile.slice(0, 4), pile.slice(4, 8), pile.slice(8, 12), pile.slice(12, 16), [], []];
-  } while (towers.slice(0, 4).some((tower) => new Set(tower).size === 1));
+    pile = shuffled(sortConfig.activeColors.flatMap((color) => Array(sortConfig.capacity).fill(color)));
+    towers = [];
+    for (let i = 0; i < sortConfig.colors; i++) towers.push(pile.slice(i * sortConfig.capacity, (i + 1) * sortConfig.capacity));
+    for (let i = 0; i < sortConfig.emptyTowers; i++) towers.push([]);
+  } while (towers.slice(0, sortConfig.colors).some((tower) => new Set(tower).size === 1));
   selectedTower = null;
   runeMoving = false;
   moves = 0;
+  $("#sort-level").textContent = state.sortLevel;
+  $("#sort-instruction").textContent = `${sortLevelSummary(state.sortLevel)}. Gather each house upon a single spire.`;
   $("#moves").textContent = moves;
   $("#sort-message").classList.add("hidden");
   renderTowers();
@@ -74,6 +113,7 @@ function newSortGame() {
 function renderTowers() {
   const board = $("#towers");
   board.innerHTML = "";
+  board.style.gridTemplateRows = `repeat(${Math.ceil(towers.length / 3)}, minmax(0, 1fr))`;
   towers.forEach((runes, index) => {
     const button = document.createElement("button");
     button.className = `tower${selectedTower === index ? " selected" : ""}`;
@@ -144,7 +184,7 @@ async function chooseTower(index) {
   const source = towers[selectedTower];
   const destination = towers[index];
   const color = source[source.length - 1];
-  if (destination.length < 4 && (!destination.length || destination[destination.length - 1] === color)) {
+  if (destination.length < sortConfig.capacity && (!destination.length || destination[destination.length - 1] === color)) {
     runeMoving = true;
     await animateRuneMove(selectedTower, index);
     destination.push(source.pop());
@@ -156,13 +196,14 @@ async function chooseTower(index) {
   }
   selectedTower = null;
   renderTowers();
-  if (towers.every((tower) => !tower.length || (tower.length === 4 && new Set(tower).size === 1))) winSort();
+  if (towers.every((tower) => !tower.length || (tower.length === sortConfig.capacity && new Set(tower).size === 1))) winSort();
 }
 
 function winSort() {
-  if (!state.sortWon) state.gold += 100;
+  state.gold += 75 + state.sortLevel * 25;
   state.sortWon = true;
-  if (state.bestMoves === "—" || moves < Number(state.bestMoves)) state.bestMoves = moves;
+  if (state.bestMoves === "\u2014" || moves < Number(state.bestMoves)) state.bestMoves = moves;
+  state.sortLevel++;
   saveState();
   updateRealm();
   setTimeout(() => $("#sort-message").classList.remove("hidden"), 300);
@@ -176,29 +217,64 @@ const canvas = $("#dragon-canvas");
 const ctx = canvas.getContext("2d");
 let pegs, ball, ballsLeft, score, aiming, aimX, aimY, gameOver, animationId, ballFrames, particles;
 
+function randomRange(min, max) {
+  return min + Math.random() * (max - min);
+}
+
+function dragonLevelConfig(level) {
+  return {
+    level,
+    targets: Math.min(13, 7 + Math.floor(level * .9)),
+    obstacles: Math.min(16, 10 + Math.floor(level * 1.25)),
+    balls: Math.min(11, 7 + Math.floor((level - 1) / 3)),
+    targetHp: Math.min(3, 2 + Math.floor((level - 1) / 5))
+  };
+}
+
+function generateDragonLayout(level) {
+  const config = dragonLevelConfig(level);
+  const slots = [];
+  const rows = [
+    { y: 118, count: 4, minX: 62, maxX: 328 },
+    { y: 188, count: 3, minX: 100, maxX: 290 },
+    { y: 260, count: 4, minX: 54, maxX: 336 },
+    { y: 332, count: 3, minX: 105, maxX: 285 },
+    { y: 405, count: 4, minX: 60, maxX: 330 },
+    { y: 472, count: 3, minX: 105, maxX: 285 }
+  ];
+  rows.forEach((row) => {
+    for (let i = 0; i < row.count; i++) {
+      const t = row.count === 1 ? .5 : i / (row.count - 1);
+      slots.push({
+        x: row.minX + (row.maxX - row.minX) * t + randomRange(-15, 15),
+        y: row.y + randomRange(-16, 16)
+      });
+    }
+  });
+  const chosen = shuffled(slots).slice(0, config.targets + config.obstacles);
+  return chosen.map((slot, index) => [slot.x, slot.y, index < config.targets ? 1 : 0]);
+}
+
 function newDragonGame() {
   cancelAnimationFrame(animationId);
-  const layout = [
-    [65, 135, 0], [145, 125, 1], [235, 125, 0], [325, 135, 1],
-    [105, 210, 1], [195, 205, 0], [285, 210, 1],
-    [55, 290, 0], [145, 285, 1], [235, 285, 0], [335, 290, 1],
-    [105, 370, 0], [195, 365, 1], [285, 370, 0],
-    [65, 445, 1], [155, 440, 0], [245, 440, 1], [325, 445, 0]
-  ];
+  const config = dragonLevelConfig(state.dragonLevel);
+  const layout = generateDragonLayout(state.dragonLevel);
   pegs = layout.map(([x, y, target]) => ({
     x, y, r: target ? 18 : 12, target: Boolean(target),
-    hp: target ? 2 : 1, hit: false, glow: 0, cooldown: 0,
+    hp: target ? config.targetHp : 1, hit: false, glow: 0, cooldown: 0,
     rotation: Math.random() * Math.PI
   }));
   particles = [];
   ball = null;
   ballFrames = 0;
-  ballsLeft = 7;
+  ballsLeft = config.balls;
   score = 0;
   aiming = true;
   aimX = 195;
   aimY = 220;
   gameOver = false;
+  $("#dragon-level").textContent = state.dragonLevel;
+  $("#dragon-instruction").textContent = `${dragonLevelSummary(state.dragonLevel)}. Aim with your finger and shatter the shields.`;
   $("#dragon-message").classList.add("hidden");
   updateDragonStats();
   drawDragon();
@@ -337,8 +413,10 @@ function finishDragon(won) {
   $("#dragon-result").textContent = won ? "Winter is broken" : "The shields endure";
   $("#dragon-result-copy").textContent = won ? "The braziers of Blackthorn burn again." : "The dragon circles. Call it back for another assault.";
   if (won) {
-    if (!state.dragonWon) { state.embers += 75; state.gold += 50; }
+    state.embers += 50 + state.dragonLevel * 25;
+    state.gold += 25 + state.dragonLevel * 10;
     state.dragonWon = true;
+    state.dragonLevel++;
     saveState();
     updateRealm();
   }
@@ -416,7 +494,7 @@ function drawDragon() {
       ctx.font = "bold 15px serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("❄", 0, 1);
+      ctx.fillText("\u2744", 0, 1);
     } else {
       ctx.shadowBlur = 12;
       ctx.shadowColor = "#ff9d32";
