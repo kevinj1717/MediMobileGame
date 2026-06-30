@@ -8,6 +8,9 @@
   dragonLevel: Number(localStorage.getItem("dragonLevel") || 1)
 };
 
+const sortLevelPreview = Number(new URLSearchParams(location.search).get("sortLevel"));
+if (Number.isFinite(sortLevelPreview) && sortLevelPreview > 0) state.sortLevel = Math.min(99, Math.floor(sortLevelPreview));
+
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 
@@ -58,6 +61,7 @@ let selectedTower = null;
 let moves = 0;
 let runeMoving = false;
 let sortConfig = null;
+let chargedTower = null;
 
 function shuffled(values) {
   const copy = [...values];
@@ -113,16 +117,18 @@ function newSortGame() {
 function renderTowers() {
   const board = $("#towers");
   board.innerHTML = "";
-  board.style.gridTemplateRows = `repeat(${Math.ceil(towers.length / 3)}, minmax(0, 1fr))`;
-  board.classList.remove("last-row-1", "last-row-2");
+  const rowCount = Math.ceil(towers.length / 3);
+  board.style.gridTemplateRows = `repeat(${rowCount}, minmax(0, 1fr))`;
+  board.classList.remove("last-row-1", "last-row-2", "rows-2", "rows-3", "rows-4");
+  board.classList.add(`rows-${rowCount}`);
   const finalRowCount = towers.length % 3;
   if (finalRowCount) board.classList.add(`last-row-${finalRowCount}`);
   towers.forEach((runes, index) => {
     const button = document.createElement("button");
     const complete = runes.length === sortConfig.capacity && new Set(runes).size === 1;
-    button.className = `tower${selectedTower === index ? " selected" : ""}${complete ? " complete" : ""}${!runes.length ? " empty" : ""}${runes.length === sortConfig.capacity ? " full" : ""}`;
+    button.className = `tower${selectedTower === index ? " selected" : ""}${complete ? " complete" : ""}${chargedTower === index ? " charged" : ""}${!runes.length ? " empty" : ""}${runes.length === sortConfig.capacity ? " full" : ""}`;
     button.setAttribute("aria-label", `Shrine ${index + 1}, ${runes.length} runes`);
-    button.innerHTML = `<span class="runes">${runes.map((color) =>
+    button.innerHTML = `<span class="rune-slots" aria-hidden="true">${Array.from({ length: sortConfig.capacity }, () => "<i></i>").join("")}</span><span class="runes">${runes.map((color) =>
       `<i class="rune ${color}" data-symbol="${runeSymbols[color]}"></i>`).join("")}</span>`;
     button.addEventListener("click", () => chooseTower(index));
     board.appendChild(button);
@@ -194,6 +200,8 @@ async function chooseTower(index) {
     runeMoving = true;
     await animateRuneMove(selectedTower, index);
     destination.push(source.pop());
+    const destinationComplete = destination.length === sortConfig.capacity && new Set(destination).size === 1;
+    if (destinationComplete) chargedTower = index;
     moves++;
     $("#moves").textContent = moves;
     runeMoving = false;
@@ -202,6 +210,14 @@ async function chooseTower(index) {
   }
   selectedTower = null;
   renderTowers();
+  if (chargedTower !== null) {
+    const justCharged = chargedTower;
+    setTimeout(() => {
+      const tower = $$(".tower")[justCharged];
+      if (tower) tower.classList.remove("charged");
+      if (chargedTower === justCharged) chargedTower = null;
+    }, 950);
+  }
   if (towers.every((tower) => !tower.length || (tower.length === sortConfig.capacity && new Set(tower).size === 1))) winSort();
 }
 

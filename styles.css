@@ -153,12 +153,14 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
     linear-gradient(180deg, #0004, transparent 20%, transparent 76%, #0005);
   pointer-events: none;
 }
-.towers { position: absolute; z-index: 2; inset: 78px 28px 50px; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: stretch; justify-content: center; gap: clamp(13px, 2dvh, 19px) clamp(14px, 4vw, 19px); }
+.towers { --rune-size: clamp(30px, 5dvh, 42px); --rune-width: min(82%, 58px); --slot-bottom: 29px; --slot-gap: 2px; --shrine-width: min(94%, 86px); position: absolute; z-index: 2; inset: 78px 28px 50px; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: stretch; justify-content: center; gap: clamp(13px, 2dvh, 19px) clamp(14px, 4vw, 19px); }
+.towers.rows-3 { --rune-size: clamp(25px, 4dvh, 34px); --rune-width: min(74%, 48px); --slot-bottom: 24px; --slot-gap: 0px; --shrine-width: min(86%, 76px); }
+.towers.rows-4 { --rune-size: clamp(18px, 2.45dvh, 21px); --rune-width: min(58%, 34px); --slot-bottom: 12px; --slot-gap: 0px; --shrine-width: min(70%, 60px); gap: clamp(8px, 1.15dvh, 12px) clamp(16px, 4.4vw, 20px); inset: 76px 28px 45px; }
 .towers.last-row-1 .tower:nth-last-child(1) { grid-column: 2; }
 .towers.last-row-2 .tower:nth-last-child(2) { grid-column: 1 / span 1; margin-left: 50%; }
 .towers.last-row-2 .tower:nth-last-child(1) { grid-column: 3 / span 1; margin-right: 50%; }
 .towers.moving { pointer-events: none; }
-.tower { position: relative; isolation: isolate; height: 100%; min-height: 98px; border: 0; border-radius: 18px; background:
+.tower { position: relative; isolation: isolate; height: 100%; min-height: 0; border: 0; border-radius: 18px; background:
   radial-gradient(ellipse at 50% 74%, #6b55ff18 0 32%, transparent 67%),
   linear-gradient(180deg, transparent 0 15%, #05091124 56%, transparent 100%);
   cursor: pointer; transform-style: preserve-3d; transition: transform .18s ease, filter .18s ease;
@@ -168,7 +170,7 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
   position: absolute;
   left: 50%;
   top: 3%;
-  width: min(94%, 86px);
+  width: var(--shrine-width);
   height: 96%;
   transform: translateX(-50%);
   border: 0;
@@ -195,6 +197,32 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
 }
 .tower > .runes::before { content: none; }
 .tower > .runes::after { content: ""; position: absolute; left: 14%; right: 14%; bottom: -22px; height: 18px; border: 1px solid #8d78ff72; border-radius: 50%; background: radial-gradient(ellipse, #8f7cff42 0 24%, #53e8ff16 34%, transparent 70%); box-shadow: 0 0 13px #7c66ff55, inset 0 0 10px #f5d18a2f; opacity: .58; animation: magic-circle 2.8s ease-in-out infinite; }
+.rune-slots {
+  position: absolute;
+  z-index: 1;
+  left: 10%;
+  right: 10%;
+  bottom: var(--slot-bottom);
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: var(--slot-gap);
+  pointer-events: none;
+}
+.rune-slots i {
+  width: calc(var(--rune-size) * .98);
+  height: var(--rune-size);
+  border: 1px solid #bca66f80;
+  border-radius: 34% 34% 42% 42%;
+  background:
+    radial-gradient(ellipse at 50% 36%, #ffffff24 0 16%, transparent 45%),
+    radial-gradient(ellipse, #30264f88 0 34%, #090d16cc 72%);
+  box-shadow: inset 0 2px 5px #000b, inset 0 -1px 3px #f1cf8730, 0 0 8px #7666ff24;
+  transform: perspective(80px) rotateX(8deg);
+  opacity: .78;
+}
+.tower.empty .rune-slots i { opacity: .52; }
+.tower.complete .rune-slots i { border-color: #8effe4aa; box-shadow: inset 0 2px 5px #000b, 0 0 12px #78ffdf55, 0 0 20px #7c66ff33; animation: slot-power 1.5s ease-in-out infinite alternate; }
 .tower.selected { transform: translateY(-3px) scale(1.02); filter: drop-shadow(0 0 13px #e6c274) drop-shadow(0 0 22px #7b67ff99); }
 .tower.selected > .runes::after { opacity: 1; box-shadow: 0 0 24px #f3d888aa, 0 0 34px #7b67ff88, inset 0 0 12px #fff4b566; }
 .tower.complete { filter: drop-shadow(0 0 10px #7dffdf77); }
@@ -203,6 +231,9 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
   opacity: 1;
 }
 .tower.complete > .runes::after { opacity: 1; background: radial-gradient(ellipse, #79ffe04d 0 28%, #8f7cff24 42%, transparent 72%); }
+.tower.charged { animation: shrine-charge .9s ease-out; }
+.tower.charged::before { animation: shrine-power-up .9s ease-out; }
+.tower.charged .rune { animation: rune-charge-pop .42s ease-out, rune-breathe 2.4s ease-in-out infinite .42s; }
 .tower.empty::before { opacity: .82; filter: drop-shadow(0 9px 10px #000d) drop-shadow(0 0 10px #756cff32) saturate(.92) brightness(.84); }
 .tower.empty::after { opacity: .72; }
 .tower:nth-child(2)::before { animation-delay: -.46s; }
@@ -225,8 +256,8 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
 @keyframes tower-settle {
   45% { transform: translateY(-4px) scale(1.035); filter: drop-shadow(0 0 18px #d9ae55aa); }
 }
-.runes { position: absolute; z-index: 2; left: 9%; right: 9%; bottom: 29px; display: flex; flex-direction: column-reverse; align-items: center; gap: 2px; }
-.rune { --rune-delay: 0s; --shine-delay: 0s; position: relative; width: min(82%, 58px); height: clamp(30px, 5dvh, 42px); overflow: visible; border: 0; border-radius: 0; background: var(--rune-art) center/contain no-repeat; box-shadow: none; animation: rune-breathe 2.4s ease-in-out infinite; animation-delay: var(--rune-delay); transform: perspective(90px) rotateX(8deg); filter: drop-shadow(0 5px 6px #000b) drop-shadow(0 0 10px var(--rune-glow)); }
+.runes { position: absolute; z-index: 2; left: 9%; right: 9%; bottom: var(--slot-bottom); display: flex; flex-direction: column-reverse; align-items: center; gap: var(--slot-gap); }
+.rune { --rune-delay: 0s; --shine-delay: 0s; position: relative; width: var(--rune-width); height: var(--rune-size); overflow: visible; border: 0; border-radius: 0; background: var(--rune-art) center/contain no-repeat; box-shadow: none; animation: rune-breathe 2.4s ease-in-out infinite; animation-delay: var(--rune-delay); transform: perspective(90px) rotateX(8deg); filter: drop-shadow(0 5px 6px #000b) drop-shadow(0 0 10px var(--rune-glow)); }
 .rune::before { content: ""; position: absolute; inset: 12% 8%; border-radius: 50%; background: radial-gradient(ellipse, var(--rune-glow) 0 18%, transparent 62%); opacity: .34; filter: blur(4px); animation: rune-shimmer 3.7s ease-in-out infinite; animation-delay: var(--shine-delay); }
 .rune.flying-rune {
   position: fixed;
@@ -253,6 +284,19 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
 @keyframes rune-shimmer { 0%, 45% { transform: translateX(-42%); opacity: .18; } 72%, 100% { transform: translateX(38%); opacity: .42; } }
 @keyframes magic-circle { 50% { transform: scaleX(.88); opacity: .9; } }
 @keyframes shrine-idle { 50% { filter: drop-shadow(0 10px 11px #000d) drop-shadow(0 0 16px #8f7cff58) saturate(1.12) brightness(1.06); } }
+@keyframes slot-power { to { opacity: 1; filter: brightness(1.18); } }
+@keyframes shrine-charge {
+  35% { transform: translateY(-4px) scale(1.045); filter: drop-shadow(0 0 22px #8effe4aa) drop-shadow(0 0 34px #f5d18a66); }
+  100% { transform: none; }
+}
+@keyframes shrine-power-up {
+  0% { filter: drop-shadow(0 10px 11px #000d) drop-shadow(0 0 10px #756cff42) saturate(1.04) brightness(1); }
+  42% { filter: drop-shadow(0 10px 11px #000d) drop-shadow(0 0 25px #8effe4cc) drop-shadow(0 0 44px #f5d18a88) saturate(1.35) brightness(1.32); }
+  100% { filter: drop-shadow(0 10px 11px #000d) drop-shadow(0 0 18px #73ffd477) drop-shadow(0 0 25px #7dffdf28) saturate(1.18) brightness(1.12); }
+}
+@keyframes rune-charge-pop {
+  45% { transform: perspective(90px) rotateX(8deg) scale(1.18); filter: brightness(1.4) drop-shadow(0 0 22px var(--rune-glow)) drop-shadow(0 0 28px #fff6); }
+}
 @keyframes flying-magic { to { filter: drop-shadow(0 13px 9px #0009) drop-shadow(0 0 24px var(--rune-glow)); } }
 
 .message { padding: 27px 20px; border: 1px solid #826b3b; border-radius: 16px; background: #151d27f5; text-align: center; box-shadow: 0 15px 45px #000a; }
