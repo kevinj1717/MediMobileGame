@@ -2,6 +2,7 @@
   const BOARD_W = 390;
   const BOARD_H = 570;
   const launcher = { x: 195, y: 64 };
+  const baseAimAngle = Math.PI / 2;
   const api = window.shatteredRealm;
   const $ = (selector) => document.querySelector(selector);
 
@@ -66,6 +67,7 @@
       this.chargeStart = 0;
       this.chargePower = 0;
       this.aim = { x: 195, y: 285 };
+      this.sceneDrift = { x: 0, y: 0 };
     }
 
     preload() {
@@ -82,22 +84,91 @@
 
     create() {
       sceneRef = this;
-      this.bg = this.add.image(BOARD_W / 2, BOARD_H / 2, "boardBg").setDisplaySize(BOARD_W, BOARD_H);
-      this.vignette = this.add.graphics().fillStyle(0x02050a, .22).fillRect(0, 0, BOARD_W, BOARD_H);
+      this.bgGroup = this.add.container(0, 0).setDepth(-20);
+      this.bg = this.add.image(BOARD_W / 2, BOARD_H / 2, "boardBg").setDisplaySize(BOARD_W * 1.055, BOARD_H * 1.055);
+      this.bgGroup.add(this.bg);
+      this.createAtmosphere();
       this.aimGraphics = this.add.graphics();
       this.fxLayer = this.add.container(0, 0);
-      this.launcher = this.add.image(launcher.x, launcher.y, "launcher").setScale(.25).setDepth(20);
+      this.launcherShadow = this.add.ellipse(launcher.x, launcher.y + 27, 74, 19, 0x020306, .55).setDepth(18);
+      this.launcher = this.add.image(launcher.x, launcher.y, "launcher").setScale(.25).setDepth(20).setOrigin(.5, .58);
+      this.launcherGlow = this.add.image(launcher.x, launcher.y + 4, "flameBurst").setScale(.28).setAlpha(.18).setDepth(19);
       this.launcher.setPipeline("Light2D");
       this.lights.enable().setAmbientColor(0x90a6c6);
       this.lights.addLight(launcher.x, launcher.y, 155, 0xff9a32, 2.2);
+      this.lights.addLight(45, 500, 140, 0xff7d25, 1.35);
+      this.lights.addLight(345, 500, 140, 0xff7d25, 1.35);
       this.input.on("pointerdown", this.startCharge, this);
       this.input.on("pointermove", this.moveAim, this);
       this.input.on("pointerup", this.releaseCharge, this);
       this.resetLevel();
     }
 
+    createAtmosphere() {
+      this.depthShade = this.add.graphics().setDepth(-12);
+      this.depthShade.fillGradientStyle(0x08131f, 0x08131f, 0x020408, 0x020408, .18, .08, .46, .72);
+      this.depthShade.fillRect(0, 0, BOARD_W, BOARD_H);
+
+      this.moonGlow = this.add.circle(113, 64, 52, 0xaedcff, .08).setDepth(-10);
+      this.moonGlow2 = this.add.circle(113, 64, 28, 0xffffff, .08).setDepth(-9);
+
+      this.fog = [];
+      for (let i = 0; i < 9; i++) {
+        const fog = this.add.ellipse(
+          Phaser.Math.Between(-50, BOARD_W + 50),
+          Phaser.Math.Between(120, 425),
+          Phaser.Math.Between(120, 230),
+          Phaser.Math.Between(16, 36),
+          0xbad8f4,
+          Phaser.Math.FloatBetween(.025, .075)
+        ).setDepth(Phaser.Math.Between(-8, 4));
+        this.fog.push(fog);
+        this.tweens.add({
+          targets: fog,
+          x: fog.x + Phaser.Math.Between(-55, 55),
+          alpha: fog.alpha * Phaser.Math.FloatBetween(.55, 1.35),
+          duration: Phaser.Math.Between(4200, 7600),
+          yoyo: true,
+          repeat: -1,
+          ease: "Sine.inOut"
+        });
+      }
+
+      this.embers = this.add.particles(0, 0, "flameBurst", {
+        x: { min: 24, max: BOARD_W - 24 },
+        y: { min: BOARD_H - 82, max: BOARD_H - 22 },
+        lifespan: { min: 1200, max: 2600 },
+        speedY: { min: -34, max: -12 },
+        speedX: { min: -12, max: 12 },
+        scale: { start: .025, end: 0 },
+        alpha: { start: .38, end: 0 },
+        frequency: 75,
+        blendMode: "ADD"
+      }).setDepth(15);
+
+      this.leftTorch = this.add.image(45, 498, "flameBurst").setScale(.22).setAlpha(.35).setDepth(13);
+      this.rightTorch = this.add.image(345, 498, "flameBurst").setScale(.22).setAlpha(.35).setDepth(13);
+      this.tweens.add({
+        targets: [this.leftTorch, this.rightTorch],
+        alpha: { from: .22, to: .52 },
+        scale: { from: .18, to: .28 },
+        duration: 520,
+        yoyo: true,
+        repeat: -1,
+        ease: "Sine.inOut"
+      });
+
+      this.foreground = this.add.graphics().setDepth(1300);
+      this.foreground.fillGradientStyle(0x000000, 0x000000, 0x050608, 0x050608, .38, .38, .04, .24);
+      this.foreground.fillRect(0, 0, BOARD_W, BOARD_H);
+      this.foreground.lineStyle(2, 0xf3d081, .2).strokeRoundedRect(7, 7, BOARD_W - 14, BOARD_H - 14, 18);
+    }
+
     resetLevel() {
-      this.pegs.forEach((peg) => peg.sprite.destroy());
+      this.pegs.forEach((peg) => {
+        peg.sprite.destroy();
+        peg.shadow?.destroy();
+      });
       this.trails.forEach((trail) => trail.destroy());
       this.pegs = [];
       this.trails = [];
@@ -109,6 +180,7 @@
       this.charging = false;
       this.chargePower = 0;
       this.aim = { x: 195, y: 285 };
+      this.updateLauncherAim(true);
       setPower(0, false);
 
       const config = levelConfig();
@@ -119,9 +191,12 @@
         const sprite = this.add.image(slot.x, slot.y, key)
           .setDepth(slot.y)
           .setScale(slot.target ? .185 : .125);
+        const shadow = this.add.ellipse(slot.x + 4, slot.y + 12, slot.target ? 34 : 25, slot.target ? 13 : 10, 0x000000, .42)
+          .setDepth(slot.y - 2);
         sprite.setPipeline("Light2D");
+        shadow.setPipeline("Light2D");
         this.tweens.add({
-          targets: sprite,
+          targets: [sprite, shadow],
           y: sprite.y + Phaser.Math.Between(-5, 5),
           duration: Phaser.Math.Between(1500, 2300),
           yoyo: true,
@@ -136,11 +211,13 @@
           hp: slot.target ? config.targetHp : 1,
           hit: false,
           cooldown: 0,
-          sprite
+          sprite,
+          shadow
         });
       });
       this.updateStats();
       this.drawAim();
+      this.updateLauncherAim();
     }
 
     updateStats() {
@@ -166,6 +243,40 @@
       this.aim.x = Phaser.Math.Clamp(pointer.x, 18, BOARD_W - 18);
       this.aim.y = Phaser.Math.Clamp(pointer.y, 100, BOARD_H - 40);
       this.drawAim();
+      this.updateLauncherAim();
+    }
+
+    updateLauncherAim(immediate = false) {
+      const dx = this.aim.x - launcher.x;
+      const dy = Math.max(48, this.aim.y - launcher.y);
+      const angle = Math.atan2(dy, dx) - baseAimAngle;
+      const clamped = Phaser.Math.Clamp(angle, -.72, .72);
+      const leanX = Phaser.Math.Clamp(dx / 90, -1, 1) * 7;
+      const leanY = this.charging ? -3 : 0;
+      this.sceneDrift.x = -leanX * .22;
+      this.sceneDrift.y = -Math.min(dy / 220, 1) * 4;
+      if (immediate) {
+        this.launcher.setRotation(clamped).setPosition(launcher.x + leanX, launcher.y + leanY);
+        this.launcherGlow.setRotation(clamped).setPosition(launcher.x + leanX, launcher.y + 4 + leanY);
+        return;
+      }
+      this.tweens.killTweensOf([this.launcher, this.launcherGlow]);
+      this.tweens.add({
+        targets: this.launcher,
+        rotation: clamped,
+        x: launcher.x + leanX,
+        y: launcher.y + leanY,
+        duration: 90,
+        ease: "Sine.Out"
+      });
+      this.tweens.add({
+        targets: this.launcherGlow,
+        rotation: clamped,
+        x: launcher.x + leanX,
+        y: launcher.y + 4 + leanY,
+        duration: 90,
+        ease: "Sine.Out"
+      });
     }
 
     releaseCharge(pointer) {
@@ -205,6 +316,7 @@
       const len = Math.hypot(dx, dy) || 1;
       const speed = 2.35 + power * 2.35;
       this.ball = this.add.image(launcher.x, launcher.y, "fireball").setScale(.12).setDepth(999);
+      this.ball.setPipeline("Light2D");
       this.ball.vx = dx / len * speed;
       this.ball.vy = dy / len * speed;
       this.ball.r = 12;
@@ -217,15 +329,25 @@
       this.updateStats();
       this.drawAim();
       this.cameras.main.shake(80, .004);
-      this.tweens.add({ targets: this.launcher, scale: .25, duration: 150, ease: "Sine.Out" });
+      this.tweens.add({ targets: this.launcher, scale: .25, x: launcher.x - (dx / len) * 9, y: launcher.y - (dy / len) * 6, duration: 75, yoyo: true, ease: "Quad.Out" });
+      this.tweens.add({ targets: this.launcherGlow, alpha: .62, scale: .46, duration: 90, yoyo: true, ease: "Quad.Out" });
     }
 
     update(_, delta) {
+      const t = this.time.now;
+      this.bgGroup.x = Phaser.Math.Linear(this.bgGroup.x, this.sceneDrift.x + Math.sin(t * .00022) * 2.2, .025);
+      this.bgGroup.y = Phaser.Math.Linear(this.bgGroup.y, this.sceneDrift.y + Math.cos(t * .00019) * 1.5, .025);
+      this.moonGlow.alpha = .07 + Math.sin(t * .0012) * .025;
+      this.moonGlow2.alpha = .06 + Math.sin(t * .0017) * .025;
+      this.launcherGlow.rotation += .012;
+      this.launcherGlow.alpha = Phaser.Math.Clamp((this.charging ? .28 + this.chargePower * .36 : .16) + Math.sin(t * .012) * .06, .08, .7);
+      this.launcherShadow.x = Phaser.Math.Linear(this.launcherShadow.x, this.launcher.x, .12);
+      this.launcherShadow.scaleX = 1 + Math.abs(this.launcher.rotation) * .28;
       if (this.charging) {
         this.chargePower = Math.min(1, (this.time.now - this.chargeStart) / 1050);
         setPower(this.chargePower, true);
         this.drawAim();
-        this.launcher.rotation = Math.sin(this.time.now * .018) * .035;
+        this.updateLauncherAim();
       }
       this.pegs.forEach((peg) => { if (peg.cooldown > 0) peg.cooldown--; });
       if (!this.ball) return;
@@ -303,13 +425,16 @@
         onComplete: () => burst.destroy()
       });
       this.cameras.main.shake(destroyed ? 150 : 80, destroyed ? .009 : .004);
+      this.spawnSparks(peg.x, peg.y, peg.target ? 0x9ee8ff : 0xff9a2c);
 
       if (peg.target && !destroyed) {
         peg.sprite.setTexture("shieldCracked");
+        this.tweens.add({ targets: peg.shadow, scaleX: peg.shadow.scaleX * 1.2, alpha: .58, yoyo: true, duration: 110, ease: "Back.Out" });
         this.tweens.add({ targets: peg.sprite, scale: .205, yoyo: true, duration: 110, ease: "Back.Out" });
       } else if (destroyed) {
         peg.hit = true;
         peg.sprite.setTexture(peg.target ? "shieldShattered" : "relic");
+        this.tweens.add({ targets: peg.shadow, alpha: 0, scaleX: peg.shadow.scaleX * 1.5, duration: 360, ease: "Sine.Out" });
         this.tweens.add({
           targets: peg.sprite,
           scale: peg.sprite.scaleX * 1.35,
@@ -323,6 +448,24 @@
         this.tweens.add({ targets: peg.sprite, scale: .145, yoyo: true, duration: 110, ease: "Back.Out" });
       }
       this.updateStats();
+    }
+
+    spawnSparks(x, y, color) {
+      for (let i = 0; i < 9; i++) {
+        const spark = this.add.circle(x, y, Phaser.Math.FloatBetween(1.2, 2.8), color, .9).setDepth(1205);
+        const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
+        const distance = Phaser.Math.Between(14, 42);
+        this.tweens.add({
+          targets: spark,
+          x: x + Math.cos(angle) * distance,
+          y: y + Math.sin(angle) * distance,
+          alpha: 0,
+          scale: .2,
+          duration: Phaser.Math.Between(260, 520),
+          ease: "Cubic.Out",
+          onComplete: () => spark.destroy()
+        });
+      }
     }
 
     finish(won) {
