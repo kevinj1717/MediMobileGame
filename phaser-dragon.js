@@ -71,12 +71,12 @@
     }
 
     preload() {
-      this.load.image("boardBg", "assets/phaser/dragonfire-background-board.jpg");
-      this.load.image("shieldIntact", "assets/phaser/shield-intact.png");
-      this.load.image("shieldCracked", "assets/phaser/shield-cracked.png");
-      this.load.image("shieldShattered", "assets/phaser/shield-shattered.png");
-      this.load.image("relic", "assets/phaser/ember-relic.png");
-      this.load.image("fireball", "assets/phaser/fireball.png");
+      this.load.image("boardBg", "assets/phaser/dragonfire-board-v2.jpg");
+      this.load.image("shieldIntact", "assets/phaser/shield-intact-v2.png");
+      this.load.image("shieldCracked", "assets/phaser/shield-cracked-v2.png");
+      this.load.image("shieldShattered", "assets/phaser/shield-shattered-v2.png");
+      this.load.image("relic", "assets/phaser/ember-relic-v2.png");
+      this.load.image("fireball", "assets/phaser/fireball-v2.png");
       this.load.image("launcher", "assets/phaser/dragon-launcher-aim-v2.png");
       this.load.image("flameBurst", "assets/phaser/flame-burst.png");
       this.load.image("frostBurst", "assets/phaser/frost-burst.png");
@@ -85,12 +85,11 @@
     create() {
       sceneRef = this;
       this.bgGroup = this.add.container(0, 0).setDepth(-20);
-      this.bg = this.add.image(BOARD_W / 2, BOARD_H / 2, "boardBg").setDisplaySize(BOARD_W * 1.055, BOARD_H * 1.055);
+      this.bg = this.add.image(BOARD_W / 2, BOARD_H / 2, "boardBg").setDisplaySize(BOARD_W, BOARD_H);
       this.bgGroup.add(this.bg);
       this.createAtmosphere();
       this.aimGraphics = this.add.graphics();
       this.fxLayer = this.add.container(0, 0);
-      this.launcherShadow = this.add.ellipse(launcher.x, launcher.y - 18, 86, 23, 0x020306, .5).setDepth(18);
       this.launcher = this.add.image(launcher.x, launcher.y, "launcher").setScale(.25).setDepth(20).setOrigin(.5, .91);
       this.launcherGlow = this.add.circle(launcher.x, launcher.y, 20, 0xff8a26, .16).setDepth(19);
       this.launcher.setPipeline("Light2D");
@@ -105,22 +104,15 @@
     }
 
     createAtmosphere() {
-      this.depthShade = this.add.graphics().setDepth(-12);
-      this.depthShade.fillGradientStyle(0x08131f, 0x08131f, 0x020408, 0x020408, .18, .08, .46, .72);
-      this.depthShade.fillRect(0, 0, BOARD_W, BOARD_H);
-
-      this.moonGlow = this.add.circle(113, 64, 52, 0xaedcff, .08).setDepth(-10);
-      this.moonGlow2 = this.add.circle(113, 64, 28, 0xffffff, .08).setDepth(-9);
-
       this.fog = [];
-      for (let i = 0; i < 9; i++) {
+      for (let i = 0; i < 5; i++) {
         const fog = this.add.ellipse(
           Phaser.Math.Between(-50, BOARD_W + 50),
-          Phaser.Math.Between(120, 425),
-          Phaser.Math.Between(120, 230),
-          Phaser.Math.Between(16, 36),
+          Phaser.Math.Between(145, 430),
+          Phaser.Math.Between(100, 190),
+          Phaser.Math.Between(12, 26),
           0xbad8f4,
-          Phaser.Math.FloatBetween(.025, .075)
+          Phaser.Math.FloatBetween(.015, .04)
         ).setDepth(Phaser.Math.Between(-8, 4));
         this.fog.push(fog);
         this.tweens.add({
@@ -135,39 +127,25 @@
       }
 
       this.embers = this.add.particles(0, 0, "flameBurst", {
-        x: { min: 24, max: BOARD_W - 24 },
-        y: { min: BOARD_H - 82, max: BOARD_H - 22 },
+        x: { min: 28, max: BOARD_W - 28 },
+        y: { min: BOARD_H - 76, max: BOARD_H - 30 },
         lifespan: { min: 1500, max: 3200 },
         speedY: { min: -24, max: -7 },
         speedX: { min: -7, max: 7 },
-        scale: { start: .012, end: 0 },
-        alpha: { start: .22, end: 0 },
-        frequency: 130,
+        scale: { start: .008, end: 0 },
+        alpha: { start: .16, end: 0 },
+        frequency: 210,
         blendMode: "ADD"
       }).setDepth(15);
 
-      this.leftTorch = this.add.circle(45, 508, 30, 0xff7d25, .075).setDepth(13);
-      this.rightTorch = this.add.circle(345, 508, 30, 0xff7d25, .075).setDepth(13);
-      this.tweens.add({
-        targets: [this.leftTorch, this.rightTorch],
-        alpha: { from: .04, to: .12 },
-        scale: { from: .95, to: 1.12 },
-        duration: 1600,
-        yoyo: true,
-        repeat: -1,
-        ease: "Sine.inOut"
-      });
-
       this.foreground = this.add.graphics().setDepth(1300);
-      this.foreground.fillGradientStyle(0x000000, 0x000000, 0x050608, 0x050608, .38, .38, .04, .24);
-      this.foreground.fillRect(0, 0, BOARD_W, BOARD_H);
-      this.foreground.lineStyle(2, 0xf3d081, .2).strokeRoundedRect(7, 7, BOARD_W - 14, BOARD_H - 14, 18);
+      this.foreground.lineStyle(2, 0xf6d68a, .22).strokeRoundedRect(18, 18, BOARD_W - 36, BOARD_H - 36, 22);
+      this.foreground.lineStyle(1, 0x7fd6ff, .1).strokeRoundedRect(31, 102, BOARD_W - 62, BOARD_H - 174, 18);
     }
 
     resetLevel() {
       this.pegs.forEach((peg) => {
         peg.sprite.destroy();
-        peg.shadow?.destroy();
       });
       this.trails.forEach((trail) => trail.destroy());
       this.pegs = [];
@@ -191,12 +169,9 @@
         const sprite = this.add.image(slot.x, slot.y, key)
           .setDepth(slot.y)
           .setScale(slot.target ? .185 : .125);
-        const shadow = this.add.ellipse(slot.x + 4, slot.y + 12, slot.target ? 34 : 25, slot.target ? 13 : 10, 0x000000, .42)
-          .setDepth(slot.y - 2);
         sprite.setPipeline("Light2D");
-        shadow.setPipeline("Light2D");
         this.tweens.add({
-          targets: [sprite, shadow],
+          targets: sprite,
           y: sprite.y + Phaser.Math.Between(-5, 5),
           duration: Phaser.Math.Between(1500, 2300),
           yoyo: true,
@@ -211,8 +186,7 @@
           hp: slot.target ? config.targetHp : 1,
           hit: false,
           cooldown: 0,
-          sprite,
-          shadow
+          sprite
         });
       });
       this.updateStats();
@@ -258,7 +232,6 @@
       this.tweens.killTweensOf([this.launcher, this.launcherGlow]);
       this.launcher.setRotation(clamped).setPosition(launcher.x + leanX, launcher.y + leanY);
       this.launcherGlow.setPosition(launcher.x + leanX, launcher.y + leanY);
-      this.launcherShadow.setPosition(launcher.x + leanX * .35, launcher.y - 18);
     }
 
     releaseCharge(pointer) {
@@ -319,10 +292,7 @@
       const t = this.time.now;
       this.bgGroup.x = Phaser.Math.Linear(this.bgGroup.x, this.sceneDrift.x + Math.sin(t * .00022) * 2.2, .025);
       this.bgGroup.y = Phaser.Math.Linear(this.bgGroup.y, this.sceneDrift.y + Math.cos(t * .00019) * 1.5, .025);
-      this.moonGlow.alpha = .07 + Math.sin(t * .0012) * .025;
-      this.moonGlow2.alpha = .06 + Math.sin(t * .0017) * .025;
       this.launcherGlow.alpha = Phaser.Math.Clamp((this.charging ? .28 + this.chargePower * .36 : .16) + Math.sin(t * .012) * .06, .08, .7);
-      this.launcherShadow.scaleX = 1 + Math.abs(this.launcher.rotation) * .28;
       if (this.charging) {
         this.chargePower = Math.min(1, (this.time.now - this.chargeStart) / 1050);
         setPower(this.chargePower, true);
@@ -409,12 +379,10 @@
 
       if (peg.target && !destroyed) {
         peg.sprite.setTexture("shieldCracked");
-        this.tweens.add({ targets: peg.shadow, scaleX: peg.shadow.scaleX * 1.2, alpha: .58, yoyo: true, duration: 110, ease: "Back.Out" });
         this.tweens.add({ targets: peg.sprite, scale: .205, yoyo: true, duration: 110, ease: "Back.Out" });
       } else if (destroyed) {
         peg.hit = true;
         peg.sprite.setTexture(peg.target ? "shieldShattered" : "relic");
-        this.tweens.add({ targets: peg.shadow, alpha: 0, scaleX: peg.shadow.scaleX * 1.5, duration: 360, ease: "Sine.Out" });
         this.tweens.add({
           targets: peg.sprite,
           scale: peg.sprite.scaleX * 1.35,
