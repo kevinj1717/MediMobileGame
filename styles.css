@@ -163,46 +163,74 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
   content: "";
   position: absolute;
   left: 50%;
-  top: 4%;
-  width: 18px;
-  height: 82%;
+  top: 8%;
+  width: min(62%, 54px);
+  height: 78%;
   transform: translateX(-50%);
-  border-radius: 13px 13px 5px 5px;
+  border: 1px solid #a88b5c88;
+  border-radius: 22px 22px 12px 12px;
   background:
-    radial-gradient(circle at 50% 9%, #d9ccff 0 5px, #6e5cff 6px 10px, transparent 11px),
-    linear-gradient(90deg, #111722 0%, #59687d 18%, #f0d38b 42%, #958052 50%, #3d4657 78%, #0b1018 100%);
-  box-shadow: inset 3px 0 5px #fff3, inset -4px 0 8px #000a, 0 3px 12px #000e, 0 0 18px #756cff44;
+    linear-gradient(90deg, transparent 0 15%, #d7c48a30 18%, transparent 24% 76%, #d7c48a30 82%, transparent 86%),
+    radial-gradient(ellipse at 50% 17%, #f0e5ff 0 9%, #7f6cff 12% 20%, transparent 26%),
+    linear-gradient(90deg, #090f18 0%, #243041 16%, #8e754c 25%, #e5c77d 32%, #5e4b38 41%, #202b3b 50%, #5e4b38 59%, #e5c77d 68%, #8e754c 75%, #17202d 87%, #080d15 100%),
+    linear-gradient(180deg, #171f2d, #0a1018);
+  box-shadow: inset 4px 0 7px #fff2, inset -5px 0 10px #000b, 0 4px 13px #000e, 0 0 20px #756cff3c;
 }
 .tower::after {
   content: "";
   position: absolute;
-  left: 7%;
-  right: 7%;
-  bottom: 7px;
-  height: 22px;
-  border-radius: 50% 50% 7px 7px;
-  border: 1px solid #b99153aa;
-  background: radial-gradient(ellipse at 50% 18%, #8c96a8, #323b49 46%, #111821 100%);
-  box-shadow: inset 0 3px 5px #fff2, inset 0 -7px 10px #0009, 0 10px 16px #0009, 0 0 16px #6b4dff22;
+  left: 2%;
+  right: 2%;
+  bottom: 5px;
+  height: 31px;
+  border-radius: 50% 50% 12px 12px;
+  border: 1px solid #c19958bb;
+  background:
+    radial-gradient(ellipse at 50% 20%, #bbb6d8, #566175 35%, #222b39 67%, #0c121b 100%),
+    linear-gradient(90deg, transparent, #f1c36a35, transparent);
+  box-shadow: inset 0 4px 6px #fff2, inset 0 -10px 12px #000a, 0 11px 18px #000a, 0 0 18px #6b4dff2d;
 }
 .tower > .runes::before {
   content: "";
   position: absolute;
   left: 50%;
-  top: -22px;
-  width: 30px;
-  height: 30px;
+  top: -24px;
+  width: 38px;
+  height: 38px;
   transform: translateX(-50%) rotate(45deg);
-  border: 1px solid #bf9d62;
-  background: radial-gradient(circle, #d7ccff 0 22%, #745cff 25% 47%, #222737 52%);
-  box-shadow: 0 0 18px #7c66ff88, inset 0 0 8px #fff5;
+  border: 1px solid #d4b16f;
+  border-radius: 9px;
+  background:
+    radial-gradient(circle at 35% 30%, #fff8 0 10%, transparent 18%),
+    radial-gradient(circle, #e9e2ff 0 18%, #826dff 23% 46%, #2b3147 52% 100%);
+  box-shadow: 0 0 21px #7c66ff8c, 0 0 34px #3ecfff22, inset 0 0 9px #fff6;
+  animation: shrine-crown 3.6s ease-in-out infinite;
 }
-.tower > .runes::after { content: ""; position: absolute; left: -5%; right: -5%; bottom: -24px; height: 22px; border: 1px solid #8d78ff77; border-radius: 50%; background: radial-gradient(ellipse, #8f7cff40 0 28%, transparent 68%); box-shadow: 0 0 16px #7c66ff55, inset 0 0 12px #f5d18a30; opacity: .58; animation: magic-circle 2.8s ease-in-out infinite; }
+.tower > .runes::after { content: ""; position: absolute; left: -8%; right: -8%; bottom: -27px; height: 26px; border: 1px solid #8d78ff77; border-radius: 50%; background: radial-gradient(ellipse, #8f7cff48 0 24%, #53e8ff18 34%, transparent 70%); box-shadow: 0 0 17px #7c66ff66, inset 0 0 13px #f5d18a36; opacity: .64; animation: magic-circle 2.8s ease-in-out infinite; }
 .tower.selected { transform: translateY(-3px) scale(1.02); filter: drop-shadow(0 0 13px #e6c274) drop-shadow(0 0 22px #7b67ff99); }
 .tower.selected > .runes::after { opacity: 1; box-shadow: 0 0 24px #f3d888aa, 0 0 34px #7b67ff88, inset 0 0 12px #fff4b566; }
 .tower.complete { filter: drop-shadow(0 0 10px #7dffdf77); }
-.tower.complete::before { box-shadow: inset 2px 0 4px #fff3, inset -3px 0 6px #0009, 0 2px 10px #000d, 0 0 19px #73ffd477; }
+.tower.complete::before {
+  background:
+    linear-gradient(90deg, transparent 0 15%, #d7c48a42 18%, transparent 24% 76%, #d7c48a42 82%, transparent 86%),
+    radial-gradient(ellipse at 50% 17%, #faffff 0 10%, #73ffd4 13% 23%, transparent 30%),
+    linear-gradient(90deg, #090f18 0%, #243041 16%, #8e754c 25%, #e5c77d 32%, #5e4b38 41%, #122332 50%, #5e4b38 59%, #e5c77d 68%, #8e754c 75%, #17202d 87%, #080d15 100%),
+    linear-gradient(180deg, #171f2d, #0a1018);
+  box-shadow: inset 2px 0 4px #fff3, inset -3px 0 6px #0009, 0 2px 10px #000d, 0 0 24px #73ffd477, 0 0 36px #7dffdf33;
+}
+.tower.complete > .runes::before { box-shadow: 0 0 26px #8effe4aa, 0 0 44px #7c66ff55, inset 0 0 10px #fff8; }
+.tower.complete > .runes::after { opacity: 1; background: radial-gradient(ellipse, #79ffe04d 0 28%, #8f7cff24 42%, transparent 72%); }
 .tower.empty::after { opacity: .78; }
+.tower:nth-child(2) > .runes::before { animation-delay: -.46s; }
+.tower:nth-child(3) > .runes::before { animation-delay: -.91s; }
+.tower:nth-child(4) > .runes::before { animation-delay: -1.34s; }
+.tower:nth-child(5) > .runes::before { animation-delay: -1.79s; }
+.tower:nth-child(6) > .runes::before { animation-delay: -2.23s; }
+.tower:nth-child(2) > .runes::after { animation-delay: -.31s; }
+.tower:nth-child(3) > .runes::after { animation-delay: -.73s; }
+.tower:nth-child(4) > .runes::after { animation-delay: -1.12s; }
+.tower:nth-child(5) > .runes::after { animation-delay: -1.58s; }
+.tower:nth-child(6) > .runes::after { animation-delay: -2.04s; }
 .tower.settle { animation: tower-settle .28s ease; }
 .tower.invalid { animation: invalid-move .28s ease; }
 @keyframes invalid-move {
@@ -214,8 +242,8 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
   45% { transform: translateY(-4px) scale(1.035); filter: drop-shadow(0 0 18px #d9ae55aa); }
 }
 .runes { position: absolute; z-index: 2; left: 7%; right: 7%; bottom: 28px; display: flex; flex-direction: column-reverse; align-items: center; gap: 2px; }
-.rune { position: relative; width: min(82%, 58px); height: clamp(30px, 5dvh, 42px); overflow: visible; border: 0; border-radius: 0; background: var(--rune-art) center/contain no-repeat; box-shadow: none; animation: rune-breathe 2.4s ease-in-out infinite; transform: perspective(90px) rotateX(8deg); filter: drop-shadow(0 5px 6px #000b) drop-shadow(0 0 10px var(--rune-glow)); }
-.rune::before { content: ""; position: absolute; inset: 12% 8%; border-radius: 50%; background: radial-gradient(ellipse, var(--rune-glow) 0 18%, transparent 62%); opacity: .34; filter: blur(4px); animation: rune-shimmer 3.4s ease-in-out infinite; }
+.rune { --rune-delay: 0s; --shine-delay: 0s; position: relative; width: min(82%, 58px); height: clamp(30px, 5dvh, 42px); overflow: visible; border: 0; border-radius: 0; background: var(--rune-art) center/contain no-repeat; box-shadow: none; animation: rune-breathe 2.4s ease-in-out infinite; animation-delay: var(--rune-delay); transform: perspective(90px) rotateX(8deg); filter: drop-shadow(0 5px 6px #000b) drop-shadow(0 0 10px var(--rune-glow)); }
+.rune::before { content: ""; position: absolute; inset: 12% 8%; border-radius: 50%; background: radial-gradient(ellipse, var(--rune-glow) 0 18%, transparent 62%); opacity: .34; filter: blur(4px); animation: rune-shimmer 3.7s ease-in-out infinite; animation-delay: var(--shine-delay); }
 .rune.flying-rune {
   position: fixed;
   z-index: 100;
@@ -225,7 +253,7 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
   filter: drop-shadow(0 10px 8px #0009) drop-shadow(0 0 13px var(--rune-glow));
   animation: flying-magic .32s ease-in-out infinite alternate;
 }
-.rune::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: linear-gradient(105deg, transparent 36%, #fff6 48%, transparent 62%); mix-blend-mode: screen; opacity: .32; transform: translateX(-38%); animation: rune-shimmer 3.4s ease-in-out infinite; }
+.rune::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: linear-gradient(105deg, transparent 36%, #fff6 48%, transparent 62%); mix-blend-mode: screen; opacity: .32; transform: translateX(-38%); animation: rune-shimmer 4.6s ease-in-out infinite alternate; animation-delay: calc(var(--shine-delay) - .38s); }
 .rune.red { --rune-glow: #ff564d; --rune-art: url("assets/phaser/rune-red-v2.png"); }
 .rune.blue { --rune-glow: #55c8ff; --rune-art: url("assets/phaser/rune-blue-v2.png"); }
 .rune.gold { --rune-glow: #ffd75e; --rune-art: url("assets/phaser/rune-gold-v2.png"); }
@@ -233,12 +261,14 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
 .rune.violet { --rune-glow: #c17bff; --rune-art: url("assets/phaser/rune-violet-v2.png"); }
 .rune.white { --rune-glow: #e8f6ff; --rune-art: url("assets/phaser/rune-white-v2.png"); }
 .rune.crimson { --rune-glow: #ff2d7d; --rune-art: url("assets/phaser/rune-crimson-v2.png"); }
-.rune:nth-child(2) { animation-delay: -.45s; }
-.rune:nth-child(3) { animation-delay: -.9s; }
-.rune:nth-child(4) { animation-delay: -1.35s; }
+.rune:nth-child(1) { --rune-delay: -.08s; --shine-delay: -.22s; }
+.rune:nth-child(2) { --rune-delay: -.45s; --shine-delay: -1.07s; }
+.rune:nth-child(3) { --rune-delay: -.9s; --shine-delay: -2.16s; }
+.rune:nth-child(4) { --rune-delay: -1.35s; --shine-delay: -3.01s; }
 @keyframes rune-breathe { 50% { filter: brightness(1.16) drop-shadow(0 6px 7px #000b) drop-shadow(0 0 18px var(--rune-glow)); } }
 @keyframes rune-shimmer { 0%, 45% { transform: translateX(-42%); opacity: .18; } 72%, 100% { transform: translateX(38%); opacity: .42; } }
 @keyframes magic-circle { 50% { transform: scaleX(.88); opacity: .9; } }
+@keyframes shrine-crown { 50% { filter: brightness(1.16); box-shadow: 0 0 28px #8f7cffaa, 0 0 42px #53e8ff35, inset 0 0 11px #fff8; } }
 @keyframes flying-magic { to { filter: drop-shadow(0 13px 9px #0009) drop-shadow(0 0 24px var(--rune-glow)); } }
 
 .message { padding: 27px 20px; border: 1px solid #826b3b; border-radius: 16px; background: #151d27f5; text-align: center; box-shadow: 0 15px 45px #000a; }
