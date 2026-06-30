@@ -221,6 +221,8 @@ let chargeStart = 0;
 let chargePower = 0;
 let chargeAnimationId = null;
 let activePointerId = null;
+let screenShake = 0;
+let dragonSceneTick = 0;
 const launcher = { x: 195, y: 38 };
 
 function randomRange(min, max) {
@@ -274,6 +276,8 @@ function newDragonGame() {
   particles = [];
   ball = null;
   ballFrames = 0;
+  screenShake = 0;
+  dragonSceneTick = 0;
   ballsLeft = config.balls;
   score = 0;
   aiming = true;
@@ -332,6 +336,7 @@ function updatePowerMeter() {
 
 function animateCharge() {
   if (!charging) return;
+  dragonSceneTick++;
   chargePower = currentChargePower();
   updatePowerMeter();
   drawDragon();
@@ -404,6 +409,8 @@ function animateDragon() {
   if (!ball) return;
   updateBall();
   updateParticles();
+  dragonSceneTick++;
+  screenShake *= .84;
   drawDragon();
   if (ball) animationId = requestAnimationFrame(animateDragon);
 }
@@ -438,6 +445,7 @@ function updateBall() {
       peg.hit = peg.hp <= 0;
       peg.glow = 1;
       peg.cooldown = 12;
+      screenShake = Math.max(screenShake, peg.hit ? 8 : 3.5);
       spawnImpact(peg.x, peg.y, peg.target, peg.hit);
       score += peg.target ? (peg.hit ? 500 : 175) : 100;
       updateDragonStats();
@@ -455,19 +463,38 @@ function updateBall() {
 }
 
 function spawnImpact(x, y, icy, destroyed) {
-  const count = destroyed ? 24 : 11;
+  const count = destroyed ? 36 : 16;
   for (let i = 0; i < count; i++) {
     const angle = Math.random() * Math.PI * 2;
-    const speed = (destroyed ? 1.8 : 1) + Math.random() * (destroyed ? 4 : 2);
+    const speed = (destroyed ? 2.2 : 1.2) + Math.random() * (destroyed ? 5.2 : 2.4);
     particles.push({
       x, y,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed - .6,
       life: 1,
       decay: .025 + Math.random() * .025,
-      size: 2 + Math.random() * (destroyed ? 5 : 3),
+      size: 2 + Math.random() * (destroyed ? 6 : 3.5),
+      spin: randomRange(-.2, .2),
+      rotation: Math.random() * Math.PI,
+      type: icy ? (destroyed ? "ice-shard" : "frost-spark") : "ember",
       color: icy ? (Math.random() > .45 ? "#9ee8ff" : "#e8fbff") : (Math.random() > .5 ? "#ffb13b" : "#6d7785")
     });
+  }
+  if (destroyed) {
+    for (let i = 0; i < 8; i++) {
+      particles.push({
+        x, y,
+        vx: randomRange(-1.2, 1.2),
+        vy: randomRange(-1.6, .4),
+        life: 1,
+        decay: .018 + Math.random() * .012,
+        size: 18 + Math.random() * 18,
+        spin: 0,
+        rotation: 0,
+        type: icy ? "frost-ring" : "smoke-ring",
+        color: icy ? "#a6edff" : "#ff9a32"
+      });
+    }
   }
 }
 
@@ -475,8 +502,9 @@ function updateParticles() {
   particles.forEach((particle) => {
     particle.x += particle.vx;
     particle.y += particle.vy;
-    particle.vy += .07;
+    particle.vy += particle.type === "frost-ring" ? .015 : .07;
     particle.vx *= .985;
+    particle.rotation += particle.spin || 0;
     particle.life -= particle.decay;
   });
   particles = particles.filter((particle) => particle.life > 0);
@@ -497,31 +525,77 @@ function finishDragon(won) {
   setTimeout(() => $("#dragon-message").classList.remove("hidden"), 350);
 }
 
-function drawDragon() {
+function roundedRectPath(context, x, y, width, height, radius) {
+  const r = Math.min(radius, width / 2, height / 2);
+  context.beginPath();
+  context.moveTo(x + r, y);
+  context.lineTo(x + width - r, y);
+  context.quadraticCurveTo(x + width, y, x + width, y + r);
+  context.lineTo(x + width, y + height - r);
+  context.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  context.lineTo(x + r, y + height);
+  context.quadraticCurveTo(x, y + height, x, y + height - r);
+  context.lineTo(x, y + r);
+  context.quadraticCurveTo(x, y, x + r, y);
+}
+
+function drawStarPolygon(radius, innerRadius, points) {
+  ctx.beginPath();
+  for (let point = 0; point < points * 2; point++) {
+    const angle = point / (points * 2) * Math.PI * 2 - Math.PI / 2;
+    const r = point % 2 ? innerRadius : radius;
+    const px = Math.cos(angle) * r;
+    const py = Math.sin(angle) * r;
+    if (!point) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+}
+
+function drawDragonBackdrop() {
   const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  gradient.addColorStop(0, "#263d5a");
-  gradient.addColorStop(.45, "#111e2d");
-  gradient.addColorStop(1, "#070a10");
+  gradient.addColorStop(0, "#304968");
+  gradient.addColorStop(.42, "#142233");
+  gradient.addColorStop(.78, "#0a1019");
+  gradient.addColorStop(1, "#05070b");
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const skyGlow = ctx.createRadialGradient(195, 72, 10, 195, 72, 210);
-  skyGlow.addColorStop(0, "#ffbf4a24");
-  skyGlow.addColorStop(.38, "#6bb8ff12");
+  const skyGlow = ctx.createRadialGradient(194, 74, 8, 194, 74, 245);
+  skyGlow.addColorStop(0, "#ffd67832");
+  skyGlow.addColorStop(.32, "#8fdcff18");
   skyGlow.addColorStop(1, "transparent");
   ctx.fillStyle = skyGlow;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = "#ffffff12";
-  for (let i = 0; i < 46; i++) {
-    const starX = (i * 83) % 390;
-    const starY = (i * 137) % 510;
-    ctx.globalAlpha = .25 + ((i % 5) * .08);
-    ctx.fillRect(starX, starY, i % 7 === 0 ? 3 : 2, i % 7 === 0 ? 3 : 2);
+  for (let i = 0; i < 60; i++) {
+    const starX = (i * 83 + 17) % 390;
+    const starY = (i * 137 + 21) % 505;
+    const twinkle = .35 + Math.sin(dragonSceneTick * .035 + i) * .18;
+    ctx.globalAlpha = twinkle;
+    ctx.fillStyle = i % 9 === 0 ? "#fff5c8" : "#d9f6ff";
+    ctx.beginPath();
+    ctx.arc(starX, starY, i % 8 === 0 ? 1.8 : 1.05, 0, Math.PI * 2);
+    ctx.fill();
   }
   ctx.globalAlpha = 1;
 
-  ctx.fillStyle = "#0c1118";
+  const moon = ctx.createRadialGradient(315, 72, 7, 315, 72, 44);
+  moon.addColorStop(0, "#fff3bc");
+  moon.addColorStop(.45, "#d4c68b");
+  moon.addColorStop(1, "#726e5a00");
+  ctx.fillStyle = moon;
+  ctx.beginPath();
+  ctx.arc(315, 72, 44, 0, Math.PI * 2);
+  ctx.fill();
+
+  const mist = ctx.createLinearGradient(0, 360, 0, 520);
+  mist.addColorStop(0, "transparent");
+  mist.addColorStop(.55, "#85d9ff10");
+  mist.addColorStop(1, "#05070b00");
+  ctx.fillStyle = mist;
+  ctx.fillRect(0, 340, 390, 190);
+
+  ctx.fillStyle = "#0d1420";
   ctx.beginPath();
   ctx.moveTo(0, 470);
   ctx.lineTo(44, 445);
@@ -537,14 +611,38 @@ function drawDragon() {
   ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = "#070b10";
-  ctx.fillRect(0, 530, 390, 40);
-  for (let x = 0; x < 390; x += 48) {
-    ctx.fillRect(x, 510, 35, 25);
-    ctx.fillRect(x + 4, 502, 8, 12);
-    ctx.fillRect(x + 23, 502, 8, 12);
-  }
+  ctx.fillStyle = "#09101a";
+  ctx.beginPath();
+  ctx.moveTo(0, 492);
+  ctx.lineTo(62, 464);
+  ctx.lineTo(126, 490);
+  ctx.lineTo(205, 452);
+  ctx.lineTo(280, 492);
+  ctx.lineTo(390, 458);
+  ctx.lineTo(390, 570);
+  ctx.lineTo(0, 570);
+  ctx.closePath();
+  ctx.fill();
 
+  const ground = ctx.createLinearGradient(0, 508, 0, 570);
+  ground.addColorStop(0, "#101927");
+  ground.addColorStop(.62, "#070b10");
+  ground.addColorStop(1, "#040609");
+  ctx.fillStyle = ground;
+  ctx.fillRect(0, 508, 390, 62);
+  for (let x = 0; x < 390; x += 48) {
+    ctx.fillStyle = "#111927";
+    roundedRectPath(ctx, x, 507, 36, 30, 3);
+    ctx.fill();
+    ctx.fillStyle = "#05080d";
+    ctx.fillRect(x + 5, 498, 8, 15);
+    ctx.fillRect(x + 23, 498, 8, 15);
+    ctx.fillStyle = "#d9ae5520";
+    ctx.fillRect(x + 3, 507, 2, 30);
+  }
+}
+
+function drawAimPreview() {
   if (aiming && !gameOver) {
     const previewPower = charging ? Math.max(.18, chargePower) : .45;
     const dx = aimX - launcher.x, dy = aimY - launcher.y;
@@ -552,9 +650,11 @@ function drawDragon() {
     const speed = 2.05 + previewPower * 2.15;
     let px = launcher.x, py = launcher.y;
     let vx = dx / length * speed, vy = dy / length * speed;
-    ctx.setLineDash([4, 9]);
-    ctx.strokeStyle = charging ? "#ffd476dd" : "#e8c57488";
-    ctx.lineWidth = charging ? 3 : 2;
+    ctx.setLineDash([3, 8]);
+    ctx.strokeStyle = charging ? "#ffe49bdd" : "#bfeeff99";
+    ctx.lineWidth = charging ? 3.4 : 2.2;
+    ctx.shadowBlur = charging ? 16 : 8;
+    ctx.shadowColor = charging ? "#ffb13b" : "#78dcff";
     ctx.beginPath();
     ctx.moveTo(px, py);
     for (let step = 0; step < 92; step++) {
@@ -566,6 +666,7 @@ function drawDragon() {
     }
     ctx.stroke();
     ctx.setLineDash([]);
+    ctx.shadowBlur = 0;
 
     ctx.globalAlpha = .22 + previewPower * .32;
     ctx.strokeStyle = "#ff9a32";
@@ -576,141 +677,245 @@ function drawDragon() {
     ctx.stroke();
     ctx.globalAlpha = 1;
   }
+}
 
-  pegs.forEach((peg) => {
-    if (peg.hit) return;
-    ctx.save();
-    ctx.translate(peg.x, peg.y);
-    ctx.rotate(peg.rotation);
-    if (peg.target) {
-      ctx.shadowBlur = 22;
-      ctx.shadowColor = "#65d7ff";
-      const ice = ctx.createRadialGradient(-5, -7, 2, 0, 0, peg.r);
-      ice.addColorStop(0, "#efffff");
-      ice.addColorStop(.32, "#79dfff");
-      ice.addColorStop(.72, "#2767a0");
-      ice.addColorStop(1, "#102d5a");
-      ctx.fillStyle = ice;
-      ctx.strokeStyle = "#dffaff";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      for (let point = 0; point < 8; point++) {
-        const angle = point / 8 * Math.PI * 2 - Math.PI / 2;
-        const radius = point % 2 ? peg.r * .72 : peg.r;
-        const px = Math.cos(angle) * radius;
-        const py = Math.sin(angle) * radius;
-        if (!point) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-      }
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      if (peg.hp === 1) {
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(-3, -15); ctx.lineTo(1, -5); ctx.lineTo(-5, 2); ctx.lineTo(4, 13);
-        ctx.moveTo(1, -5); ctx.lineTo(10, -1);
-        ctx.stroke();
-      }
-      ctx.fillStyle = "#efffff";
-      ctx.font = "bold 15px serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("\u2744", 0, 1);
-    } else {
-      ctx.shadowBlur = 12;
-      ctx.shadowColor = "#ff9d32";
-      const ember = ctx.createRadialGradient(-3, -4, 1, 0, 0, peg.r);
-      ember.addColorStop(0, "#fff0a1");
-      ember.addColorStop(.3, "#e99a31");
-      ember.addColorStop(.72, "#70401e");
-      ember.addColorStop(1, "#211716");
-      ctx.fillStyle = ember;
-      ctx.strokeStyle = "#f5bd68";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(0, 0, peg.r, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.strokeStyle = "#3a251d";
-      ctx.beginPath();
-      ctx.moveTo(-7, -5); ctx.lineTo(7, 5);
-      ctx.moveTo(7, -5); ctx.lineTo(-7, 5);
-      ctx.stroke();
-    }
-    ctx.restore();
-  });
-  ctx.shadowBlur = 0;
+function drawCrystalShield(peg) {
+  const damage = peg.hp <= 1 ? 1 : 0;
+  ctx.save();
+  ctx.translate(peg.x, peg.y);
+  ctx.rotate(peg.rotation + Math.sin(dragonSceneTick * .018 + peg.x) * .025);
+  ctx.scale(1, .96);
 
-  particles.forEach((particle) => {
-    ctx.globalAlpha = Math.max(0, particle.life);
-    ctx.shadowBlur = 8;
-    ctx.shadowColor = particle.color;
-    ctx.fillStyle = particle.color;
-    ctx.beginPath();
-    ctx.arc(particle.x, particle.y, particle.size * particle.life, 0, Math.PI * 2);
-    ctx.fill();
-  });
+  ctx.globalAlpha = .32;
+  ctx.fillStyle = "#000";
+  ctx.beginPath();
+  ctx.ellipse(3, peg.r + 7, peg.r * 1.15, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
   ctx.globalAlpha = 1;
-  ctx.shadowBlur = 0;
 
-  if (ball) {
-    ball.trail.forEach((point, index) => {
-      const strength = index / ball.trail.length;
-      ctx.fillStyle = `rgba(255, ${70 + index * 8}, 20, ${strength * .55})`;
-      ctx.beginPath();
-      ctx.arc(point.x, point.y, 2 + strength * 6, 0, Math.PI * 2);
-      ctx.fill();
-    });
-    const flameAngle = Math.atan2(ball.vy, ball.vx);
-    ctx.save();
-    ctx.translate(ball.x, ball.y);
-    ctx.rotate(flameAngle);
-    ctx.shadowBlur = 28;
-    ctx.shadowColor = "#ff4b16";
-    ctx.fillStyle = "#ff541c";
-    ctx.beginPath();
-    ctx.moveTo(-ball.r * 3.2, 0);
-    ctx.quadraticCurveTo(-ball.r * 1.4, -ball.r * 1.15, ball.r * .8, 0);
-    ctx.quadraticCurveTo(-ball.r * 1.4, ball.r * 1.15, -ball.r * 3.2, 0);
-    ctx.fill();
-    ctx.fillStyle = "#ffb52d";
-    ctx.beginPath();
-    ctx.moveTo(-ball.r * 2, 0);
-    ctx.quadraticCurveTo(-ball.r * .8, -ball.r * .75, ball.r * .9, 0);
-    ctx.quadraticCurveTo(-ball.r * .8, ball.r * .75, -ball.r * 2, 0);
-    ctx.fill();
-    ctx.shadowBlur = 18;
-    ctx.shadowColor = "#fff3a0";
-    ctx.fillStyle = "#fff5ba";
-    ctx.beginPath();
-    ctx.arc(0, 0, ball.r * .72, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-    ctx.shadowBlur = 0;
-  } else if (aiming && !gameOver) {
-    const pulse = charging ? .75 + chargePower * .9 : .85;
-    ctx.save();
-    ctx.translate(launcher.x, launcher.y);
-    ctx.shadowBlur = charging ? 24 + chargePower * 30 : 18;
-    ctx.shadowColor = "#ff7b27";
-    const orb = ctx.createRadialGradient(-3, -4, 1, 0, 0, 12 + chargePower * 11);
-    orb.addColorStop(0, "#fff8c6");
-    orb.addColorStop(.35, "#ffd063");
-    orb.addColorStop(.72, "#ff6b1f");
-    orb.addColorStop(1, "#7d1807");
-    ctx.fillStyle = orb;
-    ctx.beginPath();
-    ctx.arc(0, 0, 8 * pulse + chargePower * 7, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "#fff1a877";
+  ctx.shadowBlur = 24 + (peg.glow || 0) * 24;
+  ctx.shadowColor = "#74e5ff";
+  drawStarPolygon(peg.r * 1.24, peg.r * .74, 8);
+  const ice = ctx.createRadialGradient(-8, -10, 2, 2, 3, peg.r * 1.42);
+  ice.addColorStop(0, "#ffffff");
+  ice.addColorStop(.24, "#a8f1ff");
+  ice.addColorStop(.58, damage ? "#53abd1" : "#347fc0");
+  ice.addColorStop(1, damage ? "#174168" : "#102b61");
+  ctx.fillStyle = ice;
+  ctx.fill();
+  ctx.lineWidth = 2.6;
+  ctx.strokeStyle = "#e7fbff";
+  ctx.stroke();
+
+  ctx.shadowBlur = 0;
+  ctx.globalAlpha = .42;
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.moveTo(-peg.r * .35, -peg.r * .85);
+  ctx.lineTo(peg.r * .18, -peg.r * .18);
+  ctx.lineTo(-peg.r * .8, peg.r * .04);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  ctx.strokeStyle = damage ? "#ffffff" : "#d9fbff90";
+  ctx.lineWidth = damage ? 2 : 1.1;
+  ctx.beginPath();
+  ctx.moveTo(-4, -peg.r * .86);
+  ctx.lineTo(2, -peg.r * .25);
+  ctx.lineTo(-7, peg.r * .1);
+  ctx.lineTo(5, peg.r * .72);
+  ctx.moveTo(2, -peg.r * .25);
+  ctx.lineTo(peg.r * .56, -1);
+  ctx.stroke();
+
+  ctx.fillStyle = "#efffff";
+  ctx.font = "bold 16px serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.shadowBlur = 11;
+  ctx.shadowColor = "#ffffff";
+  ctx.fillText("\u2744", 0, 1);
+  ctx.restore();
+}
+
+function drawRelicPeg(peg) {
+  ctx.save();
+  ctx.translate(peg.x, peg.y);
+  ctx.rotate(peg.rotation + dragonSceneTick * .005);
+
+  ctx.globalAlpha = .3;
+  ctx.fillStyle = "#000";
+  ctx.beginPath();
+  ctx.ellipse(2, peg.r + 6, peg.r * 1.25, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  ctx.shadowBlur = 13;
+  ctx.shadowColor = "#ff9d32";
+  const ring = ctx.createRadialGradient(-4, -5, 1, 0, 0, peg.r * 1.2);
+  ring.addColorStop(0, "#ffe2a6");
+  ring.addColorStop(.35, "#b9782d");
+  ring.addColorStop(.72, "#4c2b1e");
+  ring.addColorStop(1, "#15100f");
+  ctx.fillStyle = ring;
+  ctx.strokeStyle = "#f5bd68";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(0, 0, peg.r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = "#261612";
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.moveTo(-7, -5); ctx.lineTo(7, 5);
+  ctx.moveTo(7, -5); ctx.lineTo(-7, 5);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawParticle(particle) {
+  ctx.save();
+  ctx.globalAlpha = Math.max(0, particle.life);
+  ctx.translate(particle.x, particle.y);
+  ctx.rotate(particle.rotation || 0);
+  ctx.shadowBlur = particle.type === "frost-ring" ? 20 : 10;
+  ctx.shadowColor = particle.color;
+  if (particle.type === "frost-ring" || particle.type === "smoke-ring") {
+    ctx.globalAlpha = particle.life * .35;
+    ctx.strokeStyle = particle.color;
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(0, 0, 15 + chargePower * 18, 0, Math.PI * 2);
+    ctx.arc(0, 0, particle.size * (1.15 - particle.life), 0, Math.PI * 2);
     ctx.stroke();
-    ctx.restore();
-    ctx.shadowBlur = 0;
+  } else if (particle.type === "ice-shard") {
+    ctx.fillStyle = particle.color;
+    ctx.beginPath();
+    ctx.moveTo(0, -particle.size);
+    ctx.lineTo(particle.size * .45, particle.size * .3);
+    ctx.lineTo(0, particle.size * .8);
+    ctx.lineTo(-particle.size * .45, particle.size * .3);
+    ctx.closePath();
+    ctx.fill();
+  } else {
+    ctx.fillStyle = particle.color;
+    ctx.beginPath();
+    ctx.arc(0, 0, particle.size * particle.life, 0, Math.PI * 2);
+    ctx.fill();
   }
+  ctx.restore();
+}
+
+function drawFireball() {
+  if (!ball) return;
+  ball.trail.forEach((point, index) => {
+    const strength = index / ball.trail.length;
+    const flame = ctx.createRadialGradient(point.x, point.y, 1, point.x, point.y, 4 + strength * 10);
+    flame.addColorStop(0, `rgba(255, 241, 164, ${strength * .65})`);
+    flame.addColorStop(.45, `rgba(255, 119, 25, ${strength * .42})`);
+    flame.addColorStop(1, "rgba(255, 46, 10, 0)");
+    ctx.fillStyle = flame;
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 4 + strength * 10, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  const flameAngle = Math.atan2(ball.vy, ball.vx);
+  ctx.save();
+  ctx.translate(ball.x, ball.y);
+  ctx.rotate(flameAngle);
+  ctx.shadowBlur = 34;
+  ctx.shadowColor = "#ff4b16";
+  const outer = ctx.createLinearGradient(-ball.r * 4, 0, ball.r, 0);
+  outer.addColorStop(0, "#ff2a0800");
+  outer.addColorStop(.28, "#ff4416");
+  outer.addColorStop(.72, "#ffaf25");
+  outer.addColorStop(1, "#fff4ba");
+  ctx.fillStyle = outer;
+  ctx.beginPath();
+  ctx.moveTo(-ball.r * 4.2, 0);
+  ctx.quadraticCurveTo(-ball.r * 1.8, -ball.r * 1.35, ball.r * .95, 0);
+  ctx.quadraticCurveTo(-ball.r * 1.8, ball.r * 1.35, -ball.r * 4.2, 0);
+  ctx.fill();
+
+  ctx.fillStyle = "#fff6c7";
+  ctx.beginPath();
+  ctx.arc(0, 0, ball.r * .78, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#ff7b24";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.restore();
+  ctx.shadowBlur = 0;
+}
+
+function drawLauncher() {
+  if (!aiming || gameOver || ball) return;
+  const pulse = charging ? .82 + chargePower * .9 : .86 + Math.sin(dragonSceneTick * .05) * .04;
+  ctx.save();
+  ctx.translate(launcher.x, launcher.y);
+
+  ctx.globalAlpha = .4;
+  ctx.fillStyle = "#000";
+  ctx.beginPath();
+  ctx.ellipse(0, 18, 30, 9, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  ctx.strokeStyle = "#8e6730";
+  ctx.lineWidth = 5;
+  ctx.shadowBlur = 12;
+  ctx.shadowColor = "#d9ae55";
+  ctx.beginPath();
+  ctx.arc(0, 0, 24, Math.PI * .18, Math.PI * .82);
+  ctx.stroke();
+
+  ctx.shadowBlur = charging ? 30 + chargePower * 36 : 18;
+  ctx.shadowColor = "#ff7b27";
+  const orb = ctx.createRadialGradient(-3, -4, 1, 0, 0, 14 + chargePower * 13);
+  orb.addColorStop(0, "#fffdf0");
+  orb.addColorStop(.26, "#fff0a8");
+  orb.addColorStop(.58, "#ff8b2c");
+  orb.addColorStop(1, "#7d1807");
+  ctx.fillStyle = orb;
+  ctx.beginPath();
+  ctx.arc(0, 0, 9 * pulse + chargePower * 8, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = "#fff1a877";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(0, 0, 17 + chargePower * 20, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+  ctx.shadowBlur = 0;
+}
+
+function drawDragon() {
+  const shakeX = screenShake ? randomRange(-screenShake, screenShake) : 0;
+  const shakeY = screenShake ? randomRange(-screenShake, screenShake) : 0;
+  ctx.save();
+  ctx.translate(shakeX, shakeY);
+  drawDragonBackdrop();
+  drawAimPreview();
+
+  pegs
+    .filter((peg) => !peg.hit)
+    .sort((a, b) => a.y - b.y)
+    .forEach((peg) => {
+      if (peg.target) drawCrystalShield(peg);
+      else drawRelicPeg(peg);
+      peg.glow *= .86;
+    });
+
+  particles.forEach(drawParticle);
+  drawFireball();
+  drawLauncher();
+  ctx.restore();
+  ctx.shadowBlur = 0;
+  ctx.globalAlpha = 1;
 }
 
 $("#restart-dragon").addEventListener("click", newDragonGame);
