@@ -262,7 +262,6 @@
       this.load.image("shieldCracked", "assets/phaser/shield-cracked-v2.png");
       this.load.image("shieldShattered", "assets/phaser/shield-shattered-v2.png");
       this.load.image("relic", "assets/phaser/ember-relic-v2.png");
-      this.load.image("fireball", "assets/phaser/fireball-v2.png");
       this.load.image("launcher", "assets/phaser/dragon-launcher-aim-v2.png");
       this.load.image("flameBurst", "assets/phaser/flame-burst.png");
       this.load.image("frostBurst", "assets/phaser/frost-burst.png");
@@ -385,8 +384,6 @@
       $("#targets-left").textContent = this.pegs.filter((peg) => peg.target && !peg.hit).length;
       $("#dragon-score").textContent = this.score;
       $("#dragon-level").textContent = api.state.dragonLevel;
-      const selector = $("#dragon-level-select");
-      if (selector && selector.value !== String(api.state.dragonLevel)) selector.value = String(((api.state.dragonLevel - 1) % 10) + 1);
       const design = levelDesign(api.state.dragonLevel);
       const config = levelConfig();
       $("#dragon-instruction").textContent = `${design.name}: ${config.targets} shields hidden behind ${config.obstacles} relic walls. Hold to charge, drag to aim, release to burn.`;
@@ -460,7 +457,8 @@
       const dy = Math.max(48, this.aim.y - launcher.y);
       const len = Math.hypot(dx, dy) || 1;
       const speed = 2.55 + power * 2.55;
-      this.ball = this.add.image(launcher.x, launcher.y, "fireball").setScale(.086).setDepth(999);
+      this.ball = this.add.circle(launcher.x, launcher.y, 8, 0xff8a22, 1).setDepth(999);
+      this.ball.setStrokeStyle(2, 0xfff0a8, .9);
       this.ball.setPipeline("Light2D");
       this.ball.vx = dx / len * speed;
       this.ball.vy = dy / len * speed;
@@ -500,15 +498,16 @@
       ball.vy += .047;
       ball.x += ball.vx;
       ball.y += ball.vy;
-      ball.rotation = Math.atan2(ball.vy, ball.vx);
+      const pulse = .85 + Math.sin(ball.frames * .36) * .12;
+      ball.setScale(pulse);
 
-      const trail = this.add.image(ball.x, ball.y, "flameBurst").setScale(.055 + Math.random() * .025).setAlpha(.55).setDepth(998);
+      const trail = this.add.image(ball.x, ball.y, "flameBurst").setScale(.04 + Math.random() * .018).setAlpha(.45).setDepth(998);
       this.trails.push(trail);
       this.tweens.add({
         targets: trail,
         alpha: 0,
-        scale: trail.scaleX * 1.9,
-        duration: 360,
+        scale: trail.scaleX * 1.65,
+        duration: 300,
         onComplete: () => {
           Phaser.Utils.Array.Remove(this.trails, trail);
           trail.destroy();
@@ -662,16 +661,7 @@
     }
   }
 
-  function previewDragonLevel(event) {
-    const level = Number(event.target.value || 1);
-    api.state.dragonLevel = level;
-    api.saveState();
-    api.updateRealm();
-    restartPhaserDragon();
-  }
-
   window.addEventListener("load", startPhaserDragon);
   $("#restart-dragon")?.addEventListener("click", () => setTimeout(restartPhaserDragon, 0));
   $("#play-dragon-again")?.addEventListener("click", () => setTimeout(restartPhaserDragon, 0));
-  $("#dragon-level-select")?.addEventListener("change", previewDragonLevel);
 })();
