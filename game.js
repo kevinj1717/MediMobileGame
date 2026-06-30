@@ -116,7 +116,8 @@ function renderTowers() {
   board.style.gridTemplateRows = `repeat(${Math.ceil(towers.length / 3)}, minmax(0, 1fr))`;
   towers.forEach((runes, index) => {
     const button = document.createElement("button");
-    button.className = `tower${selectedTower === index ? " selected" : ""}`;
+    const complete = runes.length === sortConfig.capacity && new Set(runes).size === 1;
+    button.className = `tower${selectedTower === index ? " selected" : ""}${complete ? " complete" : ""}${!runes.length ? " empty" : ""}${runes.length === sortConfig.capacity ? " full" : ""}`;
     button.setAttribute("aria-label", `Tower ${index + 1}, ${runes.length} runes`);
     button.innerHTML = `<span class="runes">${runes.map((color) =>
       `<i class="rune ${color}" data-symbol="${runeSymbols[color]}"></i>`).join("")}</span>`;
@@ -150,15 +151,17 @@ async function animateRuneMove(sourceIndex, destinationIndex) {
 
   await new Promise((resolve) => {
     requestAnimationFrame(() => {
-      flyingRune.style.transform = `translate(${endX - start.left}px, -38px)`;
+      flyingRune.style.transform = `translate(${(endX - start.left) * .45}px, -52px) scale(1.08)`;
       setTimeout(() => {
-        flyingRune.style.transform = `translate(${endX - start.left}px, ${endY - start.top}px)`;
+        flyingRune.style.transform = `translate(${endX - start.left}px, ${endY - start.top}px) scale(.98)`;
       }, 180);
     });
     setTimeout(resolve, 520);
   });
 
   flyingRune.remove();
+  destinationTower.classList.add("settle");
+  setTimeout(() => destinationTower.classList.remove("settle"), 260);
   board.classList.remove("moving");
 }
 

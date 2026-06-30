@@ -10,7 +10,7 @@
   <title>The Shattered Realm</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/shattered-realm-icon.svg">
-  <link rel="stylesheet" href="styles.css?v=19">
+  <link rel="stylesheet" href="styles.css?v=20">
 </head>
 <body>
   <div class="game-shell">
@@ -79,7 +79,9 @@
         </div>
         <p class="instruction" id="sort-instruction">Gather each house upon a single spire. Tap one tower, then another.</p>
         <div class="moves-row"><span>Level <b id="sort-level">1</b></span><span>Moves <b id="moves">0</b></span><span>Best <b id="best-moves">—</b></span></div>
-        <div id="towers" class="towers" aria-label="Rune sorting board"></div>
+        <div class="rune-board-wrap">
+          <div id="towers" class="towers" aria-label="Rune sorting board"></div>
+        </div>
         <div id="sort-message" class="message hidden">
           <span>♛</span><h3>The houses are united</h3>
           <p>Blackthorn's gatehouse rises once more.</p>
@@ -129,8 +131,8 @@
     </nav>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
-  <script src="game.js?v=19"></script>
-  <script src="phaser-dragon.js?v=19"></script>
+  <script src="game.js?v=20"></script>
+  <script src="phaser-dragon.js?v=20"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
