@@ -1,7 +1,7 @@
 (function () {
   const BOARD_W = 390;
   const BOARD_H = 570;
-  const launcher = { x: 195, y: 64 };
+  const launcher = { x: 195, y: 94 };
   const baseAimAngle = Math.PI / 2;
   const api = window.shatteredRealm;
   const $ = (selector) => document.querySelector(selector);
@@ -77,7 +77,7 @@
       this.load.image("shieldShattered", "assets/phaser/shield-shattered.png");
       this.load.image("relic", "assets/phaser/ember-relic.png");
       this.load.image("fireball", "assets/phaser/fireball.png");
-      this.load.image("launcher", "assets/phaser/dragon-launcher.png");
+      this.load.image("launcher", "assets/phaser/dragon-launcher-aim-v2.png");
       this.load.image("flameBurst", "assets/phaser/flame-burst.png");
       this.load.image("frostBurst", "assets/phaser/frost-burst.png");
     }
@@ -90,14 +90,14 @@
       this.createAtmosphere();
       this.aimGraphics = this.add.graphics();
       this.fxLayer = this.add.container(0, 0);
-      this.launcherShadow = this.add.ellipse(launcher.x, launcher.y + 27, 74, 19, 0x020306, .55).setDepth(18);
-      this.launcher = this.add.image(launcher.x, launcher.y, "launcher").setScale(.25).setDepth(20).setOrigin(.5, .58);
-      this.launcherGlow = this.add.image(launcher.x, launcher.y + 4, "flameBurst").setScale(.28).setAlpha(.18).setDepth(19);
+      this.launcherShadow = this.add.ellipse(launcher.x, launcher.y - 18, 86, 23, 0x020306, .5).setDepth(18);
+      this.launcher = this.add.image(launcher.x, launcher.y, "launcher").setScale(.25).setDepth(20).setOrigin(.5, .91);
+      this.launcherGlow = this.add.circle(launcher.x, launcher.y, 20, 0xff8a26, .16).setDepth(19);
       this.launcher.setPipeline("Light2D");
       this.lights.enable().setAmbientColor(0x90a6c6);
       this.lights.addLight(launcher.x, launcher.y, 155, 0xff9a32, 2.2);
-      this.lights.addLight(45, 500, 140, 0xff7d25, 1.35);
-      this.lights.addLight(345, 500, 140, 0xff7d25, 1.35);
+      this.lights.addLight(46, 506, 120, 0xff7d25, .7);
+      this.lights.addLight(344, 506, 120, 0xff7d25, .7);
       this.input.on("pointerdown", this.startCharge, this);
       this.input.on("pointermove", this.moveAim, this);
       this.input.on("pointerup", this.releaseCharge, this);
@@ -137,22 +137,22 @@
       this.embers = this.add.particles(0, 0, "flameBurst", {
         x: { min: 24, max: BOARD_W - 24 },
         y: { min: BOARD_H - 82, max: BOARD_H - 22 },
-        lifespan: { min: 1200, max: 2600 },
-        speedY: { min: -34, max: -12 },
-        speedX: { min: -12, max: 12 },
-        scale: { start: .025, end: 0 },
-        alpha: { start: .38, end: 0 },
-        frequency: 75,
+        lifespan: { min: 1500, max: 3200 },
+        speedY: { min: -24, max: -7 },
+        speedX: { min: -7, max: 7 },
+        scale: { start: .012, end: 0 },
+        alpha: { start: .22, end: 0 },
+        frequency: 130,
         blendMode: "ADD"
       }).setDepth(15);
 
-      this.leftTorch = this.add.image(45, 498, "flameBurst").setScale(.22).setAlpha(.35).setDepth(13);
-      this.rightTorch = this.add.image(345, 498, "flameBurst").setScale(.22).setAlpha(.35).setDepth(13);
+      this.leftTorch = this.add.circle(45, 508, 30, 0xff7d25, .075).setDepth(13);
+      this.rightTorch = this.add.circle(345, 508, 30, 0xff7d25, .075).setDepth(13);
       this.tweens.add({
         targets: [this.leftTorch, this.rightTorch],
-        alpha: { from: .22, to: .52 },
-        scale: { from: .18, to: .28 },
-        duration: 520,
+        alpha: { from: .04, to: .12 },
+        scale: { from: .95, to: 1.12 },
+        duration: 1600,
         yoyo: true,
         repeat: -1,
         ease: "Sine.inOut"
@@ -251,32 +251,14 @@
       const dy = Math.max(48, this.aim.y - launcher.y);
       const angle = Math.atan2(dy, dx) - baseAimAngle;
       const clamped = Phaser.Math.Clamp(angle, -.72, .72);
-      const leanX = Phaser.Math.Clamp(dx / 90, -1, 1) * 7;
+      const leanX = Phaser.Math.Clamp(dx / 110, -1, 1) * 4;
       const leanY = this.charging ? -3 : 0;
       this.sceneDrift.x = -leanX * .22;
       this.sceneDrift.y = -Math.min(dy / 220, 1) * 4;
-      if (immediate) {
-        this.launcher.setRotation(clamped).setPosition(launcher.x + leanX, launcher.y + leanY);
-        this.launcherGlow.setRotation(clamped).setPosition(launcher.x + leanX, launcher.y + 4 + leanY);
-        return;
-      }
       this.tweens.killTweensOf([this.launcher, this.launcherGlow]);
-      this.tweens.add({
-        targets: this.launcher,
-        rotation: clamped,
-        x: launcher.x + leanX,
-        y: launcher.y + leanY,
-        duration: 90,
-        ease: "Sine.Out"
-      });
-      this.tweens.add({
-        targets: this.launcherGlow,
-        rotation: clamped,
-        x: launcher.x + leanX,
-        y: launcher.y + 4 + leanY,
-        duration: 90,
-        ease: "Sine.Out"
-      });
+      this.launcher.setRotation(clamped).setPosition(launcher.x + leanX, launcher.y + leanY);
+      this.launcherGlow.setPosition(launcher.x + leanX, launcher.y + leanY);
+      this.launcherShadow.setPosition(launcher.x + leanX * .35, launcher.y - 18);
     }
 
     releaseCharge(pointer) {
@@ -329,8 +311,8 @@
       this.updateStats();
       this.drawAim();
       this.cameras.main.shake(80, .004);
-      this.tweens.add({ targets: this.launcher, scale: .25, x: launcher.x - (dx / len) * 9, y: launcher.y - (dy / len) * 6, duration: 75, yoyo: true, ease: "Quad.Out" });
-      this.tweens.add({ targets: this.launcherGlow, alpha: .62, scale: .46, duration: 90, yoyo: true, ease: "Quad.Out" });
+      this.tweens.add({ targets: this.launcher, scale: .235, x: launcher.x - (dx / len) * 5, y: launcher.y - (dy / len) * 5, duration: 55, yoyo: true, ease: "Quad.Out" });
+      this.tweens.add({ targets: this.launcherGlow, alpha: .48, scale: 1.75, duration: 90, yoyo: true, ease: "Quad.Out" });
     }
 
     update(_, delta) {
@@ -339,9 +321,7 @@
       this.bgGroup.y = Phaser.Math.Linear(this.bgGroup.y, this.sceneDrift.y + Math.cos(t * .00019) * 1.5, .025);
       this.moonGlow.alpha = .07 + Math.sin(t * .0012) * .025;
       this.moonGlow2.alpha = .06 + Math.sin(t * .0017) * .025;
-      this.launcherGlow.rotation += .012;
       this.launcherGlow.alpha = Phaser.Math.Clamp((this.charging ? .28 + this.chargePower * .36 : .16) + Math.sin(t * .012) * .06, .08, .7);
-      this.launcherShadow.x = Phaser.Math.Linear(this.launcherShadow.x, this.launcher.x, .12);
       this.launcherShadow.scaleX = 1 + Math.abs(this.launcher.rotation) * .28;
       if (this.charging) {
         this.chargePower = Math.min(1, (this.time.now - this.chargeStart) / 1050);
