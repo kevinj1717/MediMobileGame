@@ -33,7 +33,7 @@
       ...base,
       targets: design.slots.filter((slot) => slot.target).length,
       obstacles: design.slots.filter((slot) => !slot.target).length,
-      balls: base.balls + 1
+      balls: base.balls + 2
     };
   }
 
@@ -45,88 +45,136 @@
     return { x, y, target: true };
   }
 
+  function token(kind, x, y) {
+    return kind === "prize" ? prize(x, y) : wall(x, y);
+  }
+
+  function line(kind, x1, y1, x2, y2, count) {
+    return Array.from({ length: count }, (_, index) => {
+      const t = count === 1 ? .5 : index / (count - 1);
+      return token(kind, Math.round(x1 + (x2 - x1) * t), Math.round(y1 + (y2 - y1) * t));
+    });
+  }
+
+  function arc(kind, cx, cy, rx, ry, start, end, count) {
+    return Array.from({ length: count }, (_, index) => {
+      const t = count === 1 ? .5 : index / (count - 1);
+      const angle = start + (end - start) * t;
+      return token(kind, Math.round(cx + Math.cos(angle) * rx), Math.round(cy + Math.sin(angle) * ry));
+    });
+  }
+
+  function points(kind, coords) {
+    return coords.map(([x, y]) => token(kind, x, y));
+  }
+
+  function uniqueSlots(slots) {
+    const seen = new Set();
+    return slots.filter((slot) => {
+      const key = `${Math.round(slot.x / 4) * 4}:${Math.round(slot.y / 4) * 4}:${slot.target ? 1 : 0}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
   function levelDesign(level) {
     const designs = [
       {
         name: "Castle Gate",
-        slots: [
-          wall(92, 222), wall(298, 222), wall(92, 278), wall(298, 278), wall(92, 334), wall(298, 334),
-          wall(132, 222), wall(174, 222), wall(216, 222), wall(258, 222),
-          prize(156, 302), prize(234, 302), prize(156, 382), prize(234, 382), prize(195, 438)
-        ]
+        slots: uniqueSlots([
+          ...line("wall", 82, 214, 82, 470, 8), ...line("wall", 308, 214, 308, 470, 8),
+          ...line("wall", 82, 214, 308, 214, 9), ...line("wall", 112, 282, 278, 282, 6),
+          ...line("wall", 112, 470, 278, 470, 6), ...line("wall", 126, 330, 126, 430, 4),
+          ...line("wall", 264, 330, 264, 430, 4),
+          ...points("prize", [[156, 326], [234, 326], [156, 386], [234, 386], [195, 428], [195, 244], [122, 244], [268, 244]])
+        ])
       },
       {
         name: "Dragon Head",
-        slots: [
-          wall(195, 206), wall(138, 244), wall(252, 244), wall(104, 294), wall(286, 294),
-          wall(126, 360), wall(164, 402), wall(226, 402), wall(264, 360),
-          prize(154, 296), prize(236, 296), prize(195, 350), prize(174, 450), prize(216, 450)
-        ]
+        slots: uniqueSlots([
+          ...arc("wall", 195, 320, 118, 100, Math.PI * 1.05, Math.PI * 1.95, 15),
+          ...line("wall", 102, 314, 150, 444, 6), ...line("wall", 288, 314, 240, 444, 6),
+          ...line("wall", 150, 444, 195, 482, 4), ...line("wall", 240, 444, 195, 482, 4),
+          ...points("wall", [[88, 248], [124, 222], [266, 222], [302, 248], [140, 366], [250, 366]]),
+          ...points("prize", [[154, 292], [236, 292], [195, 346], [166, 402], [224, 402], [178, 452], [212, 452], [195, 234]])
+        ])
       },
       {
         name: "Shield Wall",
-        slots: [
-          wall(195, 204), wall(134, 232), wall(256, 232), wall(98, 290), wall(292, 290),
-          wall(120, 362), wall(270, 362), wall(158, 436), wall(232, 436),
-          prize(158, 292), prize(232, 292), prize(195, 346), prize(168, 404), prize(222, 404)
-        ]
+        slots: uniqueSlots([
+          ...arc("wall", 195, 334, 112, 126, Math.PI * 1.08, Math.PI * 1.92, 14),
+          ...line("wall", 86, 304, 122, 410, 5), ...line("wall", 304, 304, 268, 410, 5),
+          ...line("wall", 122, 410, 195, 482, 6), ...line("wall", 268, 410, 195, 482, 6),
+          ...line("wall", 130, 332, 260, 332, 6),
+          ...points("prize", [[154, 292], [236, 292], [195, 340], [154, 390], [236, 390], [172, 438], [218, 438], [195, 258]])
+        ])
       },
       {
         name: "Broken Sword",
-        slots: [
-          wall(195, 204), wall(195, 250), wall(195, 296), wall(195, 342), wall(195, 388),
-          wall(152, 430), wall(238, 430), wall(116, 466), wall(274, 466),
-          prize(154, 250), prize(236, 250), prize(158, 342), prize(232, 342), prize(195, 462)
-        ]
+        slots: uniqueSlots([
+          ...line("wall", 195, 202, 195, 466, 11), ...line("wall", 166, 238, 224, 238, 4),
+          ...line("wall", 170, 312, 220, 312, 4), ...line("wall", 150, 430, 240, 430, 5),
+          ...line("wall", 112, 474, 278, 474, 7), ...line("wall", 144, 456, 112, 486, 3),
+          ...line("wall", 246, 456, 278, 486, 3), ...points("wall", [[176, 264], [214, 286], [176, 360], [214, 382]]),
+          ...points("prize", [[156, 250], [234, 250], [156, 344], [234, 344], [195, 390], [150, 466], [240, 466], [195, 226]])
+        ])
       },
       {
         name: "Crown Keep",
-        slots: [
-          wall(84, 292), wall(126, 238), wall(168, 292), wall(210, 238), wall(252, 292), wall(306, 238),
-          wall(92, 356), wall(142, 356), wall(192, 356), wall(242, 356), wall(292, 356),
-          prize(126, 306), prize(210, 306), prize(286, 306), prize(166, 424), prize(246, 424)
-        ]
+        slots: uniqueSlots([
+          ...points("wall", [[80, 314], [116, 246], [150, 314], [195, 236], [240, 314], [274, 246], [310, 314]]),
+          ...line("wall", 86, 350, 304, 350, 9), ...line("wall", 98, 398, 292, 398, 8),
+          ...line("wall", 112, 446, 278, 446, 7), ...line("wall", 98, 350, 98, 446, 4), ...line("wall", 292, 350, 292, 446, 4),
+          ...points("prize", [[116, 318], [195, 304], [274, 318], [146, 390], [244, 390], [162, 446], [228, 446], [195, 356]])
+        ])
       },
       {
         name: "Twin Towers",
-        slots: [
-          wall(94, 220), wall(94, 278), wall(94, 336), wall(94, 394), wall(94, 452),
-          wall(296, 220), wall(296, 278), wall(296, 336), wall(296, 394), wall(296, 452),
-          prize(154, 260), prize(236, 260), prize(154, 362), prize(236, 362), prize(195, 452)
-        ]
+        slots: uniqueSlots([
+          ...line("wall", 82, 218, 82, 474, 9), ...line("wall", 126, 218, 126, 474, 9),
+          ...line("wall", 264, 218, 264, 474, 9), ...line("wall", 308, 218, 308, 474, 9),
+          ...line("wall", 82, 218, 126, 218, 3), ...line("wall", 264, 218, 308, 218, 3),
+          ...line("wall", 126, 474, 264, 474, 6), ...points("prize", [[154, 260], [236, 260], [154, 348], [236, 348], [104, 410], [286, 410], [172, 474], [218, 474]])
+        ])
       },
       {
         name: "Fang Trap",
-        slots: [
-          wall(76, 224), wall(116, 288), wall(156, 352), wall(196, 416),
-          wall(314, 224), wall(274, 288), wall(234, 352), wall(194, 416),
-          wall(104, 466), wall(286, 466),
-          prize(156, 264), prize(234, 264), prize(136, 398), prize(254, 398), prize(195, 470)
-        ]
+        slots: uniqueSlots([
+          ...line("wall", 72, 220, 188, 462, 10), ...line("wall", 318, 220, 202, 462, 10),
+          ...line("wall", 108, 238, 172, 408, 7), ...line("wall", 282, 238, 218, 408, 7),
+          ...line("wall", 90, 478, 300, 478, 8), ...points("wall", [[126, 286], [264, 286], [146, 350], [244, 350]]),
+          ...points("prize", [[156, 264], [234, 264], [144, 382], [246, 382], [176, 438], [214, 438], [118, 466], [272, 466]])
+        ])
       },
       {
         name: "Royal Standard",
-        slots: [
-          wall(116, 220), wall(116, 274), wall(116, 328), wall(116, 382), wall(116, 436),
-          wall(158, 230), wall(210, 250), wall(262, 270), wall(210, 310), wall(158, 330),
-          prize(196, 282), prize(242, 292), prize(164, 394), prize(220, 426), prize(284, 456)
-        ]
+        slots: uniqueSlots([
+          ...line("wall", 108, 208, 108, 486, 11), ...line("wall", 144, 222, 294, 270, 7),
+          ...line("wall", 144, 270, 276, 318, 6), ...line("wall", 144, 318, 252, 366, 5),
+          ...line("wall", 144, 366, 224, 414, 4), ...line("wall", 132, 486, 300, 486, 7),
+          ...points("wall", [[144, 222], [144, 270], [144, 318], [144, 366], [144, 414]]),
+          ...points("prize", [[198, 260], [246, 278], [202, 326], [164, 392], [222, 424], [284, 456], [156, 458], [108, 244]])
+        ])
       },
       {
         name: "Moon Gate",
-        slots: [
-          wall(195, 204), wall(136, 228), wall(254, 228), wall(100, 286), wall(290, 286),
-          wall(100, 358), wall(290, 358), wall(136, 426), wall(254, 426), wall(195, 454),
-          prize(156, 304), prize(234, 304), prize(154, 386), prize(236, 386), prize(195, 346)
-        ]
+        slots: uniqueSlots([
+          ...arc("wall", 195, 338, 112, 132, Math.PI * .55, Math.PI * 1.45, 17),
+          ...arc("wall", 195, 338, 72, 92, Math.PI * .58, Math.PI * 1.42, 13),
+          ...line("wall", 108, 436, 282, 436, 7), ...line("wall", 130, 474, 260, 474, 5),
+          ...points("wall", [[100, 300], [290, 300], [100, 374], [290, 374]]),
+          ...points("prize", [[156, 298], [234, 298], [154, 386], [236, 386], [195, 338], [174, 436], [216, 436], [195, 226]])
+        ])
       },
       {
         name: "Dragon Throne",
-        slots: [
-          wall(96, 236), wall(294, 236), wall(126, 306), wall(264, 306), wall(104, 376), wall(286, 376),
-          wall(146, 446), wall(194, 446), wall(242, 446), wall(194, 214),
-          prize(154, 274), prize(236, 274), prize(166, 374), prize(224, 374), prize(195, 404)
-        ]
+        slots: uniqueSlots([
+          ...line("wall", 96, 242, 146, 456, 8), ...line("wall", 294, 242, 244, 456, 8),
+          ...line("wall", 146, 456, 244, 456, 5), ...line("wall", 132, 386, 258, 386, 6),
+          ...line("wall", 154, 314, 236, 314, 4), ...points("wall", [[112, 220], [278, 220], [154, 226], [236, 226], [195, 204], [195, 260], [195, 430]]),
+          ...points("prize", [[154, 274], [236, 274], [166, 362], [224, 362], [195, 402], [146, 442], [244, 442], [195, 314]])
+        ])
       }
     ];
     return designs[(level - 1) % designs.length];
@@ -256,7 +304,7 @@
         const key = slot.target ? "shieldIntact" : "relic";
         const sprite = this.add.image(slot.x, slot.y, key)
           .setDepth(slot.y)
-          .setScale(slot.target ? .118 : .078);
+          .setScale(slot.target ? .096 : .063);
         sprite.setPipeline("Light2D");
         this.tweens.add({
           targets: sprite,
@@ -269,7 +317,7 @@
         this.pegs.push({
           x: slot.x,
           y: slot.y,
-          r: slot.target ? 16 : 11,
+          r: slot.target ? 13 : 9,
           target: slot.target,
           hp: slot.target ? config.targetHp : 1,
           hit: false,
@@ -287,6 +335,8 @@
       $("#targets-left").textContent = this.pegs.filter((peg) => peg.target && !peg.hit).length;
       $("#dragon-score").textContent = this.score;
       $("#dragon-level").textContent = api.state.dragonLevel;
+      const selector = $("#dragon-level-select");
+      if (selector && selector.value !== String(api.state.dragonLevel)) selector.value = String(((api.state.dragonLevel - 1) % 10) + 1);
       const design = levelDesign(api.state.dragonLevel);
       const config = levelConfig();
       $("#dragon-instruction").textContent = `${design.name}: ${config.targets} shields hidden behind ${config.obstacles} relic walls. Hold to charge, drag to aim, release to burn.`;
@@ -337,15 +387,15 @@
       const dx = this.aim.x - launcher.x;
       const dy = Math.max(48, this.aim.y - launcher.y);
       const len = Math.hypot(dx, dy) || 1;
-      let vx = dx / len * (2.35 + power * 2.35);
-      let vy = dy / len * (2.35 + power * 2.35);
+      let vx = dx / len * (2.55 + power * 2.55);
+      let vy = dy / len * (2.55 + power * 2.55);
       let x = launcher.x;
       let y = launcher.y;
       this.aimGraphics.lineStyle(this.charging ? 3 : 2, this.charging ? 0xffd97a : 0x9ee8ff, this.charging ? .95 : .62);
       this.aimGraphics.beginPath();
       this.aimGraphics.moveTo(x, y);
       for (let i = 0; i < 72; i++) {
-        vy += .045;
+        vy += .047;
         x += vx;
         y += vy;
         if (x < playfield.left || x > playfield.right || y < playfield.top || y > playfield.bottom) break;
@@ -359,12 +409,12 @@
       const dx = this.aim.x - launcher.x;
       const dy = Math.max(48, this.aim.y - launcher.y);
       const len = Math.hypot(dx, dy) || 1;
-      const speed = 2.35 + power * 2.35;
-      this.ball = this.add.image(launcher.x, launcher.y, "fireball").setScale(.095).setDepth(999);
+      const speed = 2.55 + power * 2.55;
+      this.ball = this.add.image(launcher.x, launcher.y, "fireball").setScale(.086).setDepth(999);
       this.ball.setPipeline("Light2D");
       this.ball.vx = dx / len * speed;
       this.ball.vy = dy / len * speed;
-      this.ball.r = 9;
+      this.ball.r = 8;
       this.ball.frames = 0;
       this.ballsLeft--;
       this.aiming = false;
@@ -397,7 +447,7 @@
     updateBall() {
       const ball = this.ball;
       ball.frames++;
-      ball.vy += .045;
+      ball.vy += .047;
       ball.x += ball.vx;
       ball.y += ball.vy;
       ball.rotation = Math.atan2(ball.vy, ball.vx);
@@ -417,16 +467,16 @@
 
       if (ball.x < playfield.left + ball.r) {
         ball.x = playfield.left + ball.r;
-        ball.vx = Math.abs(ball.vx) * .96;
+        ball.vx = Math.abs(ball.vx) * .9;
       }
       if (ball.x > playfield.right - ball.r) {
         ball.x = playfield.right - ball.r;
-        ball.vx = -Math.abs(ball.vx) * .96;
+        ball.vx = -Math.abs(ball.vx) * .9;
       }
       if (ball.y < playfield.top + ball.r) {
         ball.y = playfield.top + ball.r;
-        ball.vy = Math.abs(ball.vy) * .82;
-        ball.vx *= .985;
+        ball.vy = Math.abs(ball.vy) * .72;
+        ball.vx *= .94;
       }
 
       for (const peg of this.pegs) {
@@ -441,8 +491,8 @@
           ball.x = peg.x + nx * minDistance;
           ball.y = peg.y + ny * minDistance;
           const dot = ball.vx * nx + ball.vy * ny;
-          ball.vx = (ball.vx - 2 * dot * nx) * .98;
-          ball.vy = (ball.vy - 2 * dot * ny) * .98;
+          ball.vx = (ball.vx - 2 * dot * nx) * .92;
+          ball.vy = (ball.vy - 2 * dot * ny) * .92;
           this.hitPeg(peg);
         }
       }
@@ -469,7 +519,7 @@
       const burst = this.add.image(peg.x, peg.y, burstKey).setScale(.08).setAlpha(.95).setDepth(1200);
       this.tweens.add({
         targets: burst,
-        scale: peg.target ? .22 : .15,
+        scale: peg.target ? .18 : .12,
         alpha: 0,
         duration: 520,
         ease: "Cubic.Out",
@@ -480,7 +530,7 @@
 
       if (peg.target && !destroyed) {
         peg.sprite.setTexture("shieldCracked");
-        this.tweens.add({ targets: peg.sprite, scale: .132, yoyo: true, duration: 110, ease: "Back.Out" });
+        this.tweens.add({ targets: peg.sprite, scale: .108, yoyo: true, duration: 110, ease: "Back.Out" });
       } else if (destroyed) {
         peg.hit = true;
         peg.sprite.setTexture(peg.target ? "shieldShattered" : "relic");
@@ -494,7 +544,7 @@
           onComplete: () => peg.sprite.setVisible(false)
         });
       } else {
-        this.tweens.add({ targets: peg.sprite, scale: .09, yoyo: true, duration: 110, ease: "Back.Out" });
+        this.tweens.add({ targets: peg.sprite, scale: .072, yoyo: true, duration: 110, ease: "Back.Out" });
       }
       this.updateStats();
     }
@@ -562,7 +612,16 @@
     }
   }
 
+  function previewDragonLevel(event) {
+    const level = Number(event.target.value || 1);
+    api.state.dragonLevel = level;
+    api.saveState();
+    api.updateRealm();
+    restartPhaserDragon();
+  }
+
   window.addEventListener("load", startPhaserDragon);
   $("#restart-dragon")?.addEventListener("click", () => setTimeout(restartPhaserDragon, 0));
   $("#play-dragon-again")?.addEventListener("click", () => setTimeout(restartPhaserDragon, 0));
+  $("#dragon-level-select")?.addEventListener("change", previewDragonLevel);
 })();

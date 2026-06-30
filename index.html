@@ -10,7 +10,7 @@
   <title>The Shattered Realm</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/shattered-realm-icon.svg">
-  <link rel="stylesheet" href="styles.css?v=15">
+  <link rel="stylesheet" href="styles.css?v=17">
 </head>
 <body>
   <div class="game-shell">
@@ -103,6 +103,21 @@
           <span>Shields <b id="targets-left">8</b></span>
           <span>Score <b id="dragon-score">0</b></span>
         </div>
+        <label class="level-preview-control">
+          <span>Preview</span>
+          <select id="dragon-level-select" aria-label="Preview Dragonfire level">
+            <option value="1">1 · Castle Gate</option>
+            <option value="2">2 · Dragon Head</option>
+            <option value="3">3 · Shield Wall</option>
+            <option value="4">4 · Broken Sword</option>
+            <option value="5">5 · Crown Keep</option>
+            <option value="6">6 · Twin Towers</option>
+            <option value="7">7 · Fang Trap</option>
+            <option value="8">8 · Royal Standard</option>
+            <option value="9">9 · Moon Gate</option>
+            <option value="10">10 · Dragon Throne</option>
+          </select>
+        </label>
         <div class="canvas-wrap">
           <div id="phaser-dragon-game" aria-label="Dragonfire game board"></div>
           <canvas id="dragon-canvas" width="390" height="570"></canvas>
@@ -129,8 +144,8 @@
     </nav>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
-  <script src="game.js?v=15"></script>
-  <script src="phaser-dragon.js?v=15"></script>
+  <script src="game.js?v=17"></script>
+  <script src="phaser-dragon.js?v=17"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
