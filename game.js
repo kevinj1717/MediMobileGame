@@ -922,6 +922,16 @@ $("#restart-dragon").addEventListener("click", newDragonGame);
 $("#play-dragon-again").addEventListener("click", newDragonGame);
 window.addEventListener("resize", () => { if ($("#dragon-screen").classList.contains("active")) drawDragon(); });
 
+window.shatteredRealm = {
+  state,
+  saveState,
+  updateRealm,
+  dragonLevelConfig,
+  dragonLevelSummary,
+  randomRange,
+  shuffled
+};
+
 updateRealm();
 newSortGame();
 newDragonGame();
