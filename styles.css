@@ -40,8 +40,8 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
 .brand h1 { font: 700 16px Cinzel, serif; margin: 2px 0; letter-spacing: .02em; }
 .crown { color: var(--gold); font-size: 29px; text-shadow: 0 0 18px #e7a83d77; }
 .eyebrow { margin: 0; color: var(--gold); font-size: 9px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
-.resources { display: flex; gap: 8px; }
-.resources span { padding: 7px 9px; border: 1px solid var(--line); background: #131b25cc; border-radius: 20px; color: var(--gold); font-size: 12px; }
+.resources { display: flex; gap: 5px; }
+.resources span { padding: 7px 8px; border: 1px solid var(--line); background: #131b25cc; border-radius: 20px; color: var(--gold); font-size: 11px; }
 .resources b { color: var(--ink); margin-left: 2px; }
 
 .screen { display: none; height: calc(100dvh - clamp(56px, 9dvh, 72px) - 74px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); animation: enter .3s ease; overflow: hidden; }
@@ -82,7 +82,7 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
 
 .quest-card {
   width: 100%; min-height: clamp(58px, 8dvh, 72px); border: 1px solid var(--line); border-radius: 14px; margin: 0; padding: clamp(8px, 1.4dvh, 13px);
-  display: grid; grid-template-columns: 48px 1fr 15px; gap: 12px; align-items: center;
+  display: grid; grid-template-columns: clamp(40px, 6dvh, 48px) 1fr 15px; gap: 12px; align-items: center;
   color: var(--ink); background: var(--panel); text-align: left; cursor: pointer;
 }
 .quest-card:active { transform: scale(.985); }
@@ -104,7 +104,7 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
 .moves-row span, .dragon-stats span { border: 1px solid #303b49; border-radius: 15px; padding: 6px 11px; color: var(--muted); background: #121923; font-size: 10px; text-transform: uppercase; }
 .moves-row b, .dragon-stats b { color: var(--ink); margin-left: 4px; }
 
-.towers { height: calc(100% - clamp(52px, 8dvh, 64px) - 67px); padding: clamp(8px, 2dvh, 20px) 2px 2px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, minmax(0, 1fr)); align-content: stretch; gap: clamp(5px, 1.5dvh, 18px) 10px; }
+.towers { height: calc(100% - clamp(52px, 8dvh, 64px) - 67px); padding: clamp(8px, 2dvh, 20px) 2px 2px; display: grid; grid-template-columns: repeat(3, 1fr); align-content: stretch; gap: clamp(5px, 1.5dvh, 18px) 10px; }
 .towers.moving { pointer-events: none; }
 .tower { position: relative; height: 100%; min-height: 120px; border: 0; background: none; cursor: pointer; }
 .tower::before { content: ""; position: absolute; left: 50%; top: 7%; width: 8px; height: 77%; transform: translateX(-50%); border-radius: 6px 6px 2px 2px; background: linear-gradient(90deg, #5e6570, #bac0c5 47%, #4e5661); box-shadow: 0 2px 8px #000; }
@@ -135,6 +135,9 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
 .rune.blue { --rune-glow: #55c8ff; background: radial-gradient(ellipse at 45% 25%, #9deaff, #276ea4 48%, #071d44 100%); }
 .rune.gold { --rune-glow: #ffd75e; background: radial-gradient(ellipse at 45% 25%, #fff0a3, #b77b20 48%, #4a2406 100%); }
 .rune.green { --rune-glow: #59f0a8; background: radial-gradient(ellipse at 45% 25%, #a5ffd2, #277d5a 48%, #062e27 100%); }
+.rune.violet { --rune-glow: #c17bff; background: radial-gradient(ellipse at 45% 25%, #ebc8ff, #8145c3 48%, #230942 100%); }
+.rune.white { --rune-glow: #e8f6ff; background: radial-gradient(ellipse at 45% 25%, #ffffff, #c5dbef 48%, #526273 100%); }
+.rune.crimson { --rune-glow: #ff2d7d; background: radial-gradient(ellipse at 45% 25%, #ffb0cf, #b11650 48%, #350018 100%); }
 .rune:nth-child(2) { animation-delay: -.45s; }
 .rune:nth-child(3) { animation-delay: -.9s; }
 .rune:nth-child(4) { animation-delay: -1.35s; }
