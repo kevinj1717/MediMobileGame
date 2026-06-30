@@ -82,7 +82,7 @@ function sortLevelConfig(level) {
 
 function sortLevelSummary(level) {
   const config = sortLevelConfig(level);
-  return `${config.colors} rune houses \u00b7 ${config.colors + config.emptyTowers} towers`;
+  return `${config.colors} rune houses \u00b7 ${config.colors + config.emptyTowers} shrines`;
 }
 
 function dragonLevelSummary(level) {
@@ -104,7 +104,7 @@ function newSortGame() {
   runeMoving = false;
   moves = 0;
   $("#sort-level").textContent = state.sortLevel;
-  $("#sort-instruction").textContent = `${sortLevelSummary(state.sortLevel)}. Gather each house upon a single spire.`;
+  $("#sort-instruction").textContent = `${sortLevelSummary(state.sortLevel)}. Attune each house to a matching shrine.`;
   $("#moves").textContent = moves;
   $("#sort-message").classList.add("hidden");
   renderTowers();
@@ -121,7 +121,7 @@ function renderTowers() {
     const button = document.createElement("button");
     const complete = runes.length === sortConfig.capacity && new Set(runes).size === 1;
     button.className = `tower${selectedTower === index ? " selected" : ""}${complete ? " complete" : ""}${!runes.length ? " empty" : ""}${runes.length === sortConfig.capacity ? " full" : ""}`;
-    button.setAttribute("aria-label", `Tower ${index + 1}, ${runes.length} runes`);
+    button.setAttribute("aria-label", `Shrine ${index + 1}, ${runes.length} runes`);
     button.innerHTML = `<span class="runes">${runes.map((color) =>
       `<i class="rune ${color}" data-symbol="${runeSymbols[color]}"></i>`).join("")}</span>`;
     button.addEventListener("click", () => chooseTower(index));
