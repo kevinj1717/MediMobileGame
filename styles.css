@@ -109,7 +109,9 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
 .tower { position: relative; height: 100%; min-height: 120px; border: 0; background: none; cursor: pointer; }
 .tower::before { content: ""; position: absolute; left: 50%; top: 7%; width: 8px; height: 77%; transform: translateX(-50%); border-radius: 6px 6px 2px 2px; background: linear-gradient(90deg, #5e6570, #bac0c5 47%, #4e5661); box-shadow: 0 2px 8px #000; }
 .tower::after { content: ""; position: absolute; left: 14%; right: 14%; bottom: 10px; height: 17px; border-radius: 50% 50% 4px 4px; border: 1px solid #66717b; background: linear-gradient(#59626d, #252d37); box-shadow: 0 8px 12px #0008; }
+.tower > .runes::after { content: ""; position: absolute; left: 5%; right: 5%; bottom: -23px; height: 18px; border: 1px solid #d9ae5577; border-radius: 50%; background: radial-gradient(ellipse, #e8c57433 0 25%, transparent 68%); box-shadow: 0 0 12px #d9ae5544, inset 0 0 8px #e8c57433; opacity: .55; animation: magic-circle 2.8s ease-in-out infinite; }
 .tower.selected { filter: drop-shadow(0 0 8px #e6c274); }
+.tower.selected > .runes::after { opacity: 1; box-shadow: 0 0 20px #f3d888aa, inset 0 0 11px #fff4b566; }
 .tower.invalid { animation: invalid-move .28s ease; }
 @keyframes invalid-move {
   25% { transform: translateX(-5px); }
@@ -117,17 +119,29 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
   75% { transform: translateX(-3px); }
 }
 .runes { position: absolute; z-index: 2; left: 8%; right: 8%; bottom: 25px; display: flex; flex-direction: column-reverse; align-items: center; gap: 1px; }
-.rune { position: relative; width: 82%; height: 27px; border-radius: 50%; border: 2px solid #ffffff33; box-shadow: inset 0 -6px 7px #0005, 0 4px 5px #0007; }
+.rune { position: relative; width: 82%; height: 27px; overflow: hidden; border-radius: 50%; border: 2px solid #ffffff66; box-shadow: inset 0 -8px 9px #0007, inset 0 5px 8px #fff3, 0 4px 5px #0008, 0 0 12px var(--rune-glow); animation: rune-breathe 2.4s ease-in-out infinite; }
+.rune::before { content: ""; position: absolute; inset: -50% -25%; background: linear-gradient(105deg, transparent 38%, #fff9 48%, #fff 50%, #fff7 53%, transparent 64%); transform: translateX(-65%); animation: rune-shimmer 3.4s ease-in-out infinite; }
 .rune.flying-rune {
   position: fixed;
   z-index: 100;
   margin: 0;
   pointer-events: none;
   transition: transform .3s cubic-bezier(.3, .05, .2, 1);
-  filter: drop-shadow(0 10px 8px #0009);
+  filter: drop-shadow(0 10px 8px #0009) drop-shadow(0 0 13px var(--rune-glow));
+  animation: flying-magic .32s ease-in-out infinite alternate;
 }
-.rune::after { content: attr(data-symbol); position: absolute; inset: 1px 0 auto; color: #fff9; font-size: 12px; text-align: center; }
-.rune.red { background: #9e3b38; }.rune.blue { background: #3e6f9e; }.rune.gold { background: #ae7f31; }.rune.green { background: #427f63; }
+.rune::after { content: attr(data-symbol); position: absolute; inset: 1px 0 auto; color: #fff; font-size: 12px; text-align: center; text-shadow: 0 0 5px #fff, 0 0 10px var(--rune-glow); }
+.rune.red { --rune-glow: #ff564d; background: radial-gradient(ellipse at 45% 25%, #ff9a78, #a82c32 48%, #3c0712 100%); }
+.rune.blue { --rune-glow: #55c8ff; background: radial-gradient(ellipse at 45% 25%, #9deaff, #276ea4 48%, #071d44 100%); }
+.rune.gold { --rune-glow: #ffd75e; background: radial-gradient(ellipse at 45% 25%, #fff0a3, #b77b20 48%, #4a2406 100%); }
+.rune.green { --rune-glow: #59f0a8; background: radial-gradient(ellipse at 45% 25%, #a5ffd2, #277d5a 48%, #062e27 100%); }
+.rune:nth-child(2) { animation-delay: -.45s; }
+.rune:nth-child(3) { animation-delay: -.9s; }
+.rune:nth-child(4) { animation-delay: -1.35s; }
+@keyframes rune-breathe { 50% { filter: brightness(1.18); box-shadow: inset 0 -8px 9px #0007, inset 0 5px 8px #fff4, 0 4px 5px #0008, 0 0 20px var(--rune-glow); } }
+@keyframes rune-shimmer { 0%, 45% { transform: translateX(-70%); } 72%, 100% { transform: translateX(75%); } }
+@keyframes magic-circle { 50% { transform: scaleX(.88); opacity: .9; } }
+@keyframes flying-magic { to { filter: drop-shadow(0 13px 9px #0009) drop-shadow(0 0 24px var(--rune-glow)); } }
 
 .message { padding: 27px 20px; border: 1px solid #826b3b; border-radius: 16px; background: #151d27f5; text-align: center; box-shadow: 0 15px 45px #000a; }
 .message.hidden { display: none; }
