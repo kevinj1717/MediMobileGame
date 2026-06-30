@@ -10,7 +10,7 @@
   <title>The Shattered Realm</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/shattered-realm-icon.svg">
-  <link rel="stylesheet" href="styles.css?v=8">
+  <link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
   <div class="game-shell">
@@ -104,6 +104,7 @@
           <span>Score <b id="dragon-score">0</b></span>
         </div>
         <div class="canvas-wrap">
+          <div id="phaser-dragon-game" aria-label="Dragonfire game board"></div>
           <canvas id="dragon-canvas" width="390" height="570"></canvas>
           <div class="power-panel" aria-live="polite">
             <span id="power-label">Hold to charge</span>
@@ -127,7 +128,9 @@
       <button class="nav-button" data-go="dragon-screen"><span>☄</span>Dragonfire</button>
     </nav>
   </div>
-  <script src="game.js?v=8"></script>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
+  <script src="game.js?v=9"></script>
+  <script src="phaser-dragon.js?v=9"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
