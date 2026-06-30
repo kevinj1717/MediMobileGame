@@ -216,6 +216,12 @@ $("#play-sort-again").addEventListener("click", newSortGame);
 const canvas = $("#dragon-canvas");
 const ctx = canvas.getContext("2d");
 let pegs, ball, ballsLeft, score, aiming, aimX, aimY, gameOver, animationId, ballFrames, particles;
+let charging = false;
+let chargeStart = 0;
+let chargePower = 0;
+let chargeAnimationId = null;
+let activePointerId = null;
+const launcher = { x: 195, y: 38 };
 
 function randomRange(min, max) {
   return min + Math.random() * (max - min);
@@ -224,10 +230,10 @@ function randomRange(min, max) {
 function dragonLevelConfig(level) {
   return {
     level,
-    targets: Math.min(13, 7 + Math.floor(level * .9)),
-    obstacles: Math.min(16, 10 + Math.floor(level * 1.25)),
-    balls: Math.min(11, 7 + Math.floor((level - 1) / 3)),
-    targetHp: Math.min(3, 2 + Math.floor((level - 1) / 5))
+    targets: Math.min(12, 6 + Math.floor(level * .8)),
+    obstacles: Math.min(14, 8 + Math.floor(level * 1.05)),
+    balls: Math.min(13, 9 + Math.floor((level - 1) / 3)),
+    targetHp: Math.min(3, 1 + Math.floor(level / 5))
   };
 }
 
@@ -257,10 +263,11 @@ function generateDragonLayout(level) {
 
 function newDragonGame() {
   cancelAnimationFrame(animationId);
+  cancelAnimationFrame(chargeAnimationId);
   const config = dragonLevelConfig(state.dragonLevel);
   const layout = generateDragonLayout(state.dragonLevel);
   pegs = layout.map(([x, y, target]) => ({
-    x, y, r: target ? 18 : 12, target: Boolean(target),
+    x, y, r: target ? 21 : 12, target: Boolean(target),
     hp: target ? config.targetHp : 1, hit: false, glow: 0, cooldown: 0,
     rotation: Math.random() * Math.PI
   }));
@@ -270,12 +277,17 @@ function newDragonGame() {
   ballsLeft = config.balls;
   score = 0;
   aiming = true;
+  charging = false;
+  chargeStart = 0;
+  chargePower = 0;
+  activePointerId = null;
   aimX = 195;
-  aimY = 220;
+  aimY = 245;
   gameOver = false;
   $("#dragon-level").textContent = state.dragonLevel;
-  $("#dragon-instruction").textContent = `${dragonLevelSummary(state.dragonLevel)}. Aim with your finger and shatter the shields.`;
+  $("#dragon-instruction").textContent = `${dragonLevelSummary(state.dragonLevel)}. Hold to charge, drag to aim, release to burn.`;
   $("#dragon-message").classList.add("hidden");
+  updatePowerMeter();
   updateDragonStats();
   drawDragon();
 }
@@ -300,30 +312,92 @@ function setAim(event) {
   event.preventDefault();
   const point = pointerPosition(event);
   aimX = Math.max(12, Math.min(378, point.x));
-  aimY = Math.max(65, point.y);
+  aimY = Math.max(82, point.y);
   drawDragon();
 }
 
-function launch(event) {
-  if (!aiming || gameOver) return;
+function currentChargePower() {
+  if (!charging) return chargePower;
+  return Math.min(1, (performance.now() - chargeStart) / 1150);
+}
+
+function updatePowerMeter() {
+  const fill = $("#power-fill");
+  const label = $("#power-label");
+  if (!fill || !label) return;
+  const percent = Math.round(chargePower * 100);
+  fill.style.width = `${percent}%`;
+  label.textContent = charging ? `Dragonfire ${percent}%` : "Hold to charge";
+}
+
+function animateCharge() {
+  if (!charging) return;
+  chargePower = currentChargePower();
+  updatePowerMeter();
+  drawDragon();
+  chargeAnimationId = requestAnimationFrame(animateCharge);
+}
+
+function startCharge(event) {
+  if (!aiming || gameOver || ball) return;
+  event.preventDefault();
+  activePointerId = event.pointerId;
+  canvas.setPointerCapture?.(event.pointerId);
   setAim(event);
-  const dx = aimX - 195;
-  const dy = Math.max(35, aimY - 35);
+  charging = true;
+  chargeStart = performance.now();
+  chargePower = .12;
+  animateCharge();
+}
+
+function moveCharge(event) {
+  if (!aiming || gameOver) return;
+  if (activePointerId !== null && event.pointerId !== activePointerId) return;
+  setAim(event);
+}
+
+function releaseCharge(event) {
+  if (!aiming || gameOver || !charging) return;
+  if (activePointerId !== null && event.pointerId !== activePointerId) return;
+  event.preventDefault();
+  setAim(event);
+  launchCharged();
+  activePointerId = null;
+}
+
+function cancelCharge() {
+  charging = false;
+  chargePower = 0;
+  activePointerId = null;
+  cancelAnimationFrame(chargeAnimationId);
+  updatePowerMeter();
+  drawDragon();
+}
+
+function launchCharged() {
+  cancelAnimationFrame(chargeAnimationId);
+  chargePower = Math.max(.18, currentChargePower());
+  charging = false;
+  const dx = aimX - launcher.x;
+  const dy = Math.max(48, aimY - launcher.y);
   const length = Math.hypot(dx, dy);
-  ball = { x: 195, y: 35, vx: dx / length * 3.2, vy: dy / length * 3.2, r: 8, trail: [] };
+  const speed = 2.05 + chargePower * 2.15;
+  ball = { x: launcher.x, y: launcher.y, vx: dx / length * speed, vy: dy / length * speed, r: 9, trail: [], power: chargePower };
   ballFrames = 0;
   ballsLeft--;
   aiming = false;
+  chargePower = 0;
+  updatePowerMeter();
   updateDragonStats();
   animateDragon();
 }
 
-canvas.addEventListener("mousemove", setAim);
-canvas.addEventListener("click", launch);
-canvas.addEventListener("touchmove", setAim, { passive: false });
-canvas.addEventListener("touchend", (event) => {
-  const touch = event.changedTouches[0];
-  launch({ preventDefault() {}, clientX: touch.clientX, clientY: touch.clientY });
+canvas.addEventListener("pointerdown", startCharge);
+canvas.addEventListener("pointermove", moveCharge);
+canvas.addEventListener("pointerup", releaseCharge);
+canvas.addEventListener("pointercancel", cancelCharge);
+canvas.addEventListener("pointerleave", (event) => {
+  if (charging && event.pointerType === "mouse") releaseCharge(event);
 });
 
 function animateDragon() {
@@ -336,14 +410,14 @@ function animateDragon() {
 
 function updateBall() {
   ballFrames++;
-  ball.vy += 0.055;
+  ball.vy += 0.047;
   ball.x += ball.vx;
   ball.y += ball.vy;
   ball.trail.push({ x: ball.x, y: ball.y });
-  if (ball.trail.length > 14) ball.trail.shift();
+  if (ball.trail.length > 18) ball.trail.shift();
 
-  if (ball.x < ball.r) { ball.x = ball.r; ball.vx = Math.abs(ball.vx) * .9; }
-  if (ball.x > canvas.width - ball.r) { ball.x = canvas.width - ball.r; ball.vx = -Math.abs(ball.vx) * .9; }
+  if (ball.x < ball.r) { ball.x = ball.r; ball.vx = Math.abs(ball.vx) * .96; }
+  if (ball.x > canvas.width - ball.r) { ball.x = canvas.width - ball.r; ball.vx = -Math.abs(ball.vx) * .96; }
 
   for (const peg of pegs) {
     if (peg.cooldown > 0) peg.cooldown--;
@@ -358,8 +432,8 @@ function updateBall() {
       ball.x = peg.x + nx * minDistance;
       ball.y = peg.y + ny * minDistance;
       const dot = ball.vx * nx + ball.vy * ny;
-      ball.vx = (ball.vx - 2 * dot * nx) * .94;
-      ball.vy = (ball.vy - 2 * dot * ny) * .94;
+      ball.vx = (ball.vx - 2 * dot * nx) * .98;
+      ball.vy = (ball.vy - 2 * dot * ny) * .98;
       peg.hp--;
       peg.hit = peg.hp <= 0;
       peg.glow = 1;
@@ -425,14 +499,43 @@ function finishDragon(won) {
 
 function drawDragon() {
   const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  gradient.addColorStop(0, "#1e3046");
-  gradient.addColorStop(.65, "#101a26");
-  gradient.addColorStop(1, "#090e14");
+  gradient.addColorStop(0, "#263d5a");
+  gradient.addColorStop(.45, "#111e2d");
+  gradient.addColorStop(1, "#070a10");
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = "#ffffff0b";
-  for (let i = 0; i < 35; i++) ctx.fillRect((i * 83) % 390, (i * 137) % 530, 2, 2);
+  const skyGlow = ctx.createRadialGradient(195, 72, 10, 195, 72, 210);
+  skyGlow.addColorStop(0, "#ffbf4a24");
+  skyGlow.addColorStop(.38, "#6bb8ff12");
+  skyGlow.addColorStop(1, "transparent");
+  ctx.fillStyle = skyGlow;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#ffffff12";
+  for (let i = 0; i < 46; i++) {
+    const starX = (i * 83) % 390;
+    const starY = (i * 137) % 510;
+    ctx.globalAlpha = .25 + ((i % 5) * .08);
+    ctx.fillRect(starX, starY, i % 7 === 0 ? 3 : 2, i % 7 === 0 ? 3 : 2);
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = "#0c1118";
+  ctx.beginPath();
+  ctx.moveTo(0, 470);
+  ctx.lineTo(44, 445);
+  ctx.lineTo(84, 464);
+  ctx.lineTo(135, 430);
+  ctx.lineTo(185, 462);
+  ctx.lineTo(242, 420);
+  ctx.lineTo(302, 462);
+  ctx.lineTo(346, 438);
+  ctx.lineTo(390, 472);
+  ctx.lineTo(390, 570);
+  ctx.lineTo(0, 570);
+  ctx.closePath();
+  ctx.fill();
 
   ctx.fillStyle = "#070b10";
   ctx.fillRect(0, 530, 390, 40);
@@ -443,16 +546,35 @@ function drawDragon() {
   }
 
   if (aiming && !gameOver) {
-    const dx = aimX - 195, dy = aimY - 35;
+    const previewPower = charging ? Math.max(.18, chargePower) : .45;
+    const dx = aimX - launcher.x, dy = aimY - launcher.y;
     const length = Math.hypot(dx, dy);
-    ctx.setLineDash([5, 8]);
-    ctx.strokeStyle = "#e8c57488";
-    ctx.lineWidth = 2;
+    const speed = 2.05 + previewPower * 2.15;
+    let px = launcher.x, py = launcher.y;
+    let vx = dx / length * speed, vy = dy / length * speed;
+    ctx.setLineDash([4, 9]);
+    ctx.strokeStyle = charging ? "#ffd476dd" : "#e8c57488";
+    ctx.lineWidth = charging ? 3 : 2;
     ctx.beginPath();
-    ctx.moveTo(195, 35);
-    ctx.lineTo(195 + dx / length * 95, 35 + dy / length * 95);
+    ctx.moveTo(px, py);
+    for (let step = 0; step < 92; step++) {
+      vy += .047;
+      px += vx;
+      py += vy;
+      if (px < 8 || px > 382 || py > 555) break;
+      if (step % 2 === 0) ctx.lineTo(px, py);
+    }
     ctx.stroke();
     ctx.setLineDash([]);
+
+    ctx.globalAlpha = .22 + previewPower * .32;
+    ctx.strokeStyle = "#ff9a32";
+    ctx.lineWidth = 8 + previewPower * 10;
+    ctx.beginPath();
+    ctx.moveTo(launcher.x, launcher.y);
+    ctx.lineTo(launcher.x + dx / length * (36 + previewPower * 34), launcher.y + dy / length * (36 + previewPower * 34));
+    ctx.stroke();
+    ctx.globalAlpha = 1;
   }
 
   pegs.forEach((peg) => {
@@ -567,12 +689,26 @@ function drawDragon() {
     ctx.restore();
     ctx.shadowBlur = 0;
   } else if (aiming && !gameOver) {
-    ctx.shadowBlur = 18;
+    const pulse = charging ? .75 + chargePower * .9 : .85;
+    ctx.save();
+    ctx.translate(launcher.x, launcher.y);
+    ctx.shadowBlur = charging ? 24 + chargePower * 30 : 18;
     ctx.shadowColor = "#ff7b27";
-    ctx.fillStyle = "#ffd27b";
+    const orb = ctx.createRadialGradient(-3, -4, 1, 0, 0, 12 + chargePower * 11);
+    orb.addColorStop(0, "#fff8c6");
+    orb.addColorStop(.35, "#ffd063");
+    orb.addColorStop(.72, "#ff6b1f");
+    orb.addColorStop(1, "#7d1807");
+    ctx.fillStyle = orb;
     ctx.beginPath();
-    ctx.arc(195, 35, 8, 0, Math.PI * 2);
+    ctx.arc(0, 0, 8 * pulse + chargePower * 7, 0, Math.PI * 2);
     ctx.fill();
+    ctx.strokeStyle = "#fff1a877";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, 15 + chargePower * 18, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
     ctx.shadowBlur = 0;
   }
 }

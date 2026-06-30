@@ -1,0 +1,19 @@
+{
+  "name": "The Shattered Realm",
+  "short_name": "Shattered Realm",
+  "description": "A portrait fantasy puzzle arcade game built for quick mobile play.",
+  "start_url": "./?app=1",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#080b10",
+  "theme_color": "#10151d",
+  "icons": [
+    {
+      "src": "icons/shattered-realm-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
