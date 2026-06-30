@@ -1,10 +1,10 @@
-const CACHE_NAME = "shattered-realm-v10";
+const CACHE_NAME = "shattered-realm-v11";
 const ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=10",
-  "./game.js?v=10",
-  "./phaser-dragon.js?v=10",
+  "./styles.css?v=11",
+  "./game.js?v=11",
+  "./phaser-dragon.js?v=11",
   "./assets/phaser/dragonfire-background-board.jpg",
   "./assets/phaser/shield-intact.png",
   "./assets/phaser/shield-cracked.png",
@@ -12,6 +12,7 @@ const ASSETS = [
   "./assets/phaser/ember-relic.png",
   "./assets/phaser/fireball.png",
   "./assets/phaser/dragon-launcher.png",
+  "./assets/phaser/dragon-launcher-aim-v2.png",
   "./assets/phaser/flame-burst.png",
   "./assets/phaser/frost-burst.png",
   "./manifest.webmanifest",
