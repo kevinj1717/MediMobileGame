@@ -93,12 +93,27 @@ header { height: 78px; display: flex; align-items: center; justify-content: spac
 .moves-row b, .dragon-stats b { color: var(--ink); margin-left: 4px; }
 
 .towers { min-height: 490px; padding: 35px 2px 10px; display: grid; grid-template-columns: repeat(3, 1fr); align-content: start; gap: 33px 10px; }
+.towers.moving { pointer-events: none; }
 .tower { position: relative; height: 184px; border: 0; background: none; cursor: pointer; }
 .tower::before { content: ""; position: absolute; left: 50%; top: 13px; width: 8px; height: 142px; transform: translateX(-50%); border-radius: 6px 6px 2px 2px; background: linear-gradient(90deg, #5e6570, #bac0c5 47%, #4e5661); box-shadow: 0 2px 8px #000; }
 .tower::after { content: ""; position: absolute; left: 14%; right: 14%; bottom: 10px; height: 17px; border-radius: 50% 50% 4px 4px; border: 1px solid #66717b; background: linear-gradient(#59626d, #252d37); box-shadow: 0 8px 12px #0008; }
 .tower.selected { filter: drop-shadow(0 0 8px #e6c274); }
+.tower.invalid { animation: invalid-move .28s ease; }
+@keyframes invalid-move {
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-3px); }
+}
 .runes { position: absolute; z-index: 2; left: 8%; right: 8%; bottom: 25px; display: flex; flex-direction: column-reverse; align-items: center; gap: 1px; }
 .rune { position: relative; width: 82%; height: 27px; border-radius: 50%; border: 2px solid #ffffff33; box-shadow: inset 0 -6px 7px #0005, 0 4px 5px #0007; }
+.rune.flying-rune {
+  position: fixed;
+  z-index: 100;
+  margin: 0;
+  pointer-events: none;
+  transition: transform .3s cubic-bezier(.3, .05, .2, 1);
+  filter: drop-shadow(0 10px 8px #0009);
+}
 .rune::after { content: attr(data-symbol); position: absolute; inset: 1px 0 auto; color: #fff9; font-size: 12px; text-align: center; }
 .rune.red { background: #9e3b38; }.rune.blue { background: #3e6f9e; }.rune.gold { background: #ae7f31; }.rune.green { background: #427f63; }
 
@@ -109,6 +124,8 @@ header { height: 78px; display: flex; align-items: center; justify-content: spac
 .message h3 { margin: 8px 0; font: 700 18px Cinzel, serif; }
 .message p { margin: 0 0 17px; color: var(--muted); font-size: 12px; }
 .message button { padding: 10px 18px; border: 1px solid #9a7a3f; border-radius: 8px; color: #17130c; background: linear-gradient(#e4bf70, #ae8138); font-weight: 700; cursor: pointer; }
+.message-actions { display: flex; justify-content: center; gap: 8px; }
+.message button.secondary { color: var(--ink); border-color: var(--line); background: #252f3b; }
 
 .dragon-stats { gap: 5px; margin-bottom: 10px; }
 .dragon-stats span { padding: 6px 8px; }
