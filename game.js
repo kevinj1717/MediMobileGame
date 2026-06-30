@@ -62,6 +62,7 @@ let moves = 0;
 let runeMoving = false;
 let sortConfig = null;
 let chargedTower = null;
+let chargedColor = null;
 
 function shuffled(values) {
   const copy = [...values];
@@ -126,9 +127,10 @@ function renderTowers() {
   towers.forEach((runes, index) => {
     const button = document.createElement("button");
     const complete = runes.length === sortConfig.capacity && new Set(runes).size === 1;
-    button.className = `tower${selectedTower === index ? " selected" : ""}${complete ? " complete" : ""}${chargedTower === index ? " charged" : ""}${!runes.length ? " empty" : ""}${runes.length === sortConfig.capacity ? " full" : ""}`;
+    const completeColor = complete ? runes[0] : "";
+    button.className = `tower${selectedTower === index ? " selected" : ""}${complete ? " complete" : ""}${completeColor ? ` ${completeColor}` : ""}${chargedTower === index ? " charged" : ""}${!runes.length ? " empty" : ""}${runes.length === sortConfig.capacity ? " full" : ""}`;
     button.setAttribute("aria-label", `Shrine ${index + 1}, ${runes.length} runes`);
-    button.innerHTML = `<span class="rune-slots" aria-hidden="true">${Array.from({ length: sortConfig.capacity }, () => "<i></i>").join("")}</span><span class="runes">${runes.map((color) =>
+    button.innerHTML = `${chargedTower === index && chargedColor ? `<span class="symbol-burst ${chargedColor}" aria-hidden="true">${Array.from({ length: 6 }, (_, burstIndex) => `<i style="--burst-index:${burstIndex}">${runeSymbols[chargedColor]}</i>`).join("")}</span>` : ""}<span class="rune-slots" aria-hidden="true">${Array.from({ length: sortConfig.capacity }, () => "<i></i>").join("")}</span><span class="runes">${runes.map((color) =>
       `<i class="rune ${color}" data-symbol="${runeSymbols[color]}"></i>`).join("")}</span>`;
     button.addEventListener("click", () => chooseTower(index));
     board.appendChild(button);
@@ -201,7 +203,10 @@ async function chooseTower(index) {
     await animateRuneMove(selectedTower, index);
     destination.push(source.pop());
     const destinationComplete = destination.length === sortConfig.capacity && new Set(destination).size === 1;
-    if (destinationComplete) chargedTower = index;
+    if (destinationComplete) {
+      chargedTower = index;
+      chargedColor = color;
+    }
     moves++;
     $("#moves").textContent = moves;
     runeMoving = false;
@@ -215,7 +220,10 @@ async function chooseTower(index) {
     setTimeout(() => {
       const tower = $$(".tower")[justCharged];
       if (tower) tower.classList.remove("charged");
-      if (chargedTower === justCharged) chargedTower = null;
+      if (chargedTower === justCharged) {
+        chargedTower = null;
+        chargedColor = null;
+      }
     }, 950);
   }
   if (towers.every((tower) => !tower.length || (tower.length === sortConfig.capacity && new Set(tower).size === 1))) winSort();
