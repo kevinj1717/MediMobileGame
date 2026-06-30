@@ -154,11 +154,11 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
   pointer-events: none;
 }
 .towers { --rune-size: clamp(30px, 5dvh, 42px); --rune-width: min(82%, 58px); --slot-bottom: 29px; --slot-gap: 2px; --shrine-width: min(94%, 86px); position: absolute; z-index: 2; inset: 78px 28px 50px; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: stretch; justify-content: center; gap: clamp(13px, 2dvh, 19px) clamp(14px, 4vw, 19px); }
-.towers.rows-3 { --rune-size: clamp(25px, 4dvh, 34px); --rune-width: min(74%, 48px); --slot-bottom: 24px; --slot-gap: 0px; --shrine-width: min(86%, 76px); }
+.towers.rows-3 { --rune-size: clamp(23px, 3.05dvh, 26px); --rune-width: min(68%, 42px); --slot-bottom: 17px; --slot-gap: 0px; --shrine-width: min(86%, 76px); }
 .towers.rows-4 { --rune-size: clamp(18px, 2.45dvh, 21px); --rune-width: min(58%, 34px); --slot-bottom: 12px; --slot-gap: 0px; --shrine-width: min(70%, 60px); gap: clamp(8px, 1.15dvh, 12px) clamp(16px, 4.4vw, 20px); inset: 76px 28px 45px; }
 .towers.last-row-1 .tower:nth-last-child(1) { grid-column: 2; }
-.towers.last-row-2 .tower:nth-last-child(2) { grid-column: 1 / span 1; margin-left: 50%; }
-.towers.last-row-2 .tower:nth-last-child(1) { grid-column: 3 / span 1; margin-right: 50%; }
+.towers.last-row-2 .tower:nth-last-child(2) { grid-column: 1 / span 1; }
+.towers.last-row-2 .tower:nth-last-child(1) { grid-column: 3 / span 1; }
 .towers.moving { pointer-events: none; }
 .tower { position: relative; isolation: isolate; height: 100%; min-height: 0; border: 0; border-radius: 18px; background:
   radial-gradient(ellipse at 50% 74%, #6b55ff18 0 32%, transparent 67%),
