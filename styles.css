@@ -120,22 +120,96 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
 .moves-row span, .dragon-stats span { border: 1px solid #303b49; border-radius: 15px; padding: 6px 11px; color: var(--muted); background: #121923; font-size: 10px; text-transform: uppercase; }
 .moves-row b, .dragon-stats b { color: var(--ink); margin-left: 4px; }
 
-.towers { height: calc(100% - clamp(52px, 8dvh, 64px) - 67px); padding: clamp(8px, 2dvh, 20px) 2px 2px; display: grid; grid-template-columns: repeat(3, 1fr); align-content: stretch; gap: clamp(5px, 1.5dvh, 18px) 10px; }
+.rune-board-wrap {
+  position: relative;
+  height: calc(100% - clamp(52px, 8dvh, 64px) - 72px);
+  width: auto;
+  max-width: 100%;
+  aspect-ratio: 390/570;
+  margin: auto;
+  overflow: hidden;
+  border: 1px solid #59647a;
+  border-radius: 19px;
+  background: #0d1420 url("assets/phaser/rune-board-v1.jpg") center/100% 100% no-repeat;
+  box-shadow: inset 0 0 60px #000b, 0 18px 45px #0008, 0 0 0 1px #ffffff08;
+}
+.rune-board-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 14px 20px;
+  border: 1px solid #8fd6ff24;
+  border-radius: 22px;
+  box-shadow: inset 0 0 24px #6e5cff16, 0 0 28px #9276ff14;
+  pointer-events: none;
+}
+.rune-board-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 47%, #557cff1a 0 16%, transparent 42%),
+    radial-gradient(circle at 17% 88%, #6c45ff30 0 7%, transparent 18%),
+    radial-gradient(circle at 83% 88%, #6c45ff30 0 7%, transparent 18%),
+    linear-gradient(180deg, #0004, transparent 20%, transparent 76%, #0005);
+  pointer-events: none;
+}
+.towers { position: absolute; z-index: 2; inset: 76px 32px 54px; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); align-content: stretch; gap: clamp(8px, 1.5dvh, 15px) 10px; }
 .towers.moving { pointer-events: none; }
-.tower { position: relative; height: 100%; min-height: 120px; border: 0; background: none; cursor: pointer; }
-.tower::before { content: ""; position: absolute; left: 50%; top: 7%; width: 8px; height: 77%; transform: translateX(-50%); border-radius: 6px 6px 2px 2px; background: linear-gradient(90deg, #5e6570, #bac0c5 47%, #4e5661); box-shadow: 0 2px 8px #000; }
-.tower::after { content: ""; position: absolute; left: 14%; right: 14%; bottom: 10px; height: 17px; border-radius: 50% 50% 4px 4px; border: 1px solid #66717b; background: linear-gradient(#59626d, #252d37); box-shadow: 0 8px 12px #0008; }
-.tower > .runes::after { content: ""; position: absolute; left: 5%; right: 5%; bottom: -23px; height: 18px; border: 1px solid #d9ae5577; border-radius: 50%; background: radial-gradient(ellipse, #e8c57433 0 25%, transparent 68%); box-shadow: 0 0 12px #d9ae5544, inset 0 0 8px #e8c57433; opacity: .55; animation: magic-circle 2.8s ease-in-out infinite; }
-.tower.selected { filter: drop-shadow(0 0 8px #e6c274); }
-.tower.selected > .runes::after { opacity: 1; box-shadow: 0 0 20px #f3d888aa, inset 0 0 11px #fff4b566; }
+.tower { position: relative; height: 100%; min-height: 98px; border: 0; background: none; cursor: pointer; transform-style: preserve-3d; transition: transform .18s ease, filter .18s ease; }
+.tower::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: 10px;
+  height: 78%;
+  transform: translateX(-50%);
+  border-radius: 8px 8px 3px 3px;
+  background: linear-gradient(90deg, #222935 0%, #8b97aa 22%, #f0d38b 47%, #576274 72%, #151b24 100%);
+  box-shadow: inset 2px 0 4px #fff3, inset -3px 0 6px #0009, 0 2px 10px #000d, 0 0 14px #756cff33;
+}
+.tower::after {
+  content: "";
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  bottom: 7px;
+  height: 22px;
+  border-radius: 50% 50% 7px 7px;
+  border: 1px solid #b99153aa;
+  background: radial-gradient(ellipse at 50% 18%, #8c96a8, #323b49 46%, #111821 100%);
+  box-shadow: inset 0 3px 5px #fff2, inset 0 -7px 10px #0009, 0 10px 16px #0009, 0 0 16px #6b4dff22;
+}
+.tower > .runes::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -18px;
+  width: 24px;
+  height: 24px;
+  transform: translateX(-50%) rotate(45deg);
+  border: 1px solid #bf9d62;
+  background: radial-gradient(circle, #d7ccff 0 22%, #745cff 25% 47%, #222737 52%);
+  box-shadow: 0 0 18px #7c66ff88, inset 0 0 8px #fff5;
+}
+.tower > .runes::after { content: ""; position: absolute; left: -5%; right: -5%; bottom: -24px; height: 22px; border: 1px solid #8d78ff77; border-radius: 50%; background: radial-gradient(ellipse, #8f7cff40 0 28%, transparent 68%); box-shadow: 0 0 16px #7c66ff55, inset 0 0 12px #f5d18a30; opacity: .58; animation: magic-circle 2.8s ease-in-out infinite; }
+.tower.selected { transform: translateY(-3px) scale(1.02); filter: drop-shadow(0 0 13px #e6c274) drop-shadow(0 0 22px #7b67ff99); }
+.tower.selected > .runes::after { opacity: 1; box-shadow: 0 0 24px #f3d888aa, 0 0 34px #7b67ff88, inset 0 0 12px #fff4b566; }
+.tower.complete { filter: drop-shadow(0 0 10px #7dffdf77); }
+.tower.complete::before { box-shadow: inset 2px 0 4px #fff3, inset -3px 0 6px #0009, 0 2px 10px #000d, 0 0 19px #73ffd477; }
+.tower.empty::after { opacity: .78; }
+.tower.settle { animation: tower-settle .28s ease; }
 .tower.invalid { animation: invalid-move .28s ease; }
 @keyframes invalid-move {
   25% { transform: translateX(-5px); }
   50% { transform: translateX(5px); }
   75% { transform: translateX(-3px); }
 }
-.runes { position: absolute; z-index: 2; left: 8%; right: 8%; bottom: 25px; display: flex; flex-direction: column-reverse; align-items: center; gap: 1px; }
-.rune { position: relative; width: 82%; height: 27px; overflow: hidden; border-radius: 50%; border: 2px solid #ffffff66; box-shadow: inset 0 -8px 9px #0007, inset 0 5px 8px #fff3, 0 4px 5px #0008, 0 0 12px var(--rune-glow); animation: rune-breathe 2.4s ease-in-out infinite; }
+@keyframes tower-settle {
+  45% { transform: translateY(-4px) scale(1.035); filter: drop-shadow(0 0 18px #d9ae55aa); }
+}
+.runes { position: absolute; z-index: 2; left: 7%; right: 7%; bottom: 28px; display: flex; flex-direction: column-reverse; align-items: center; gap: 2px; }
+.rune { position: relative; width: 86%; height: clamp(20px, 3.6dvh, 27px); overflow: hidden; border-radius: 50%; border: 2px solid #f5e4b988; box-shadow: inset 0 -9px 10px #0008, inset 0 5px 8px #fff4, 0 5px 7px #0009, 0 0 14px var(--rune-glow), 0 0 0 1px #0009; animation: rune-breathe 2.4s ease-in-out infinite; transform: perspective(80px) rotateX(10deg); }
 .rune::before { content: ""; position: absolute; inset: -50% -25%; background: linear-gradient(105deg, transparent 38%, #fff9 48%, #fff 50%, #fff7 53%, transparent 64%); transform: translateX(-65%); animation: rune-shimmer 3.4s ease-in-out infinite; }
 .rune.flying-rune {
   position: fixed;
@@ -146,7 +220,7 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
   filter: drop-shadow(0 10px 8px #0009) drop-shadow(0 0 13px var(--rune-glow));
   animation: flying-magic .32s ease-in-out infinite alternate;
 }
-.rune::after { content: attr(data-symbol); position: absolute; inset: 1px 0 auto; color: #fff; font-size: 12px; text-align: center; text-shadow: 0 0 5px #fff, 0 0 10px var(--rune-glow); }
+.rune::after { content: attr(data-symbol); position: absolute; inset: 1px 0 auto; color: #fff; font-size: clamp(10px, 1.8dvh, 13px); text-align: center; text-shadow: 0 0 5px #fff, 0 0 10px var(--rune-glow); }
 .rune.red { --rune-glow: #ff564d; background: radial-gradient(ellipse at 45% 25%, #ff9a78, #a82c32 48%, #3c0712 100%); }
 .rune.blue { --rune-glow: #55c8ff; background: radial-gradient(ellipse at 45% 25%, #9deaff, #276ea4 48%, #071d44 100%); }
 .rune.gold { --rune-glow: #ffd75e; background: radial-gradient(ellipse at 45% 25%, #fff0a3, #b77b20 48%, #4a2406 100%); }
