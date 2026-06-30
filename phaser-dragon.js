@@ -335,6 +335,8 @@
       $("#targets-left").textContent = this.pegs.filter((peg) => peg.target && !peg.hit).length;
       $("#dragon-score").textContent = this.score;
       $("#dragon-level").textContent = api.state.dragonLevel;
+      const selector = $("#dragon-level-select");
+      if (selector && selector.value !== String(api.state.dragonLevel)) selector.value = String(((api.state.dragonLevel - 1) % 10) + 1);
       const design = levelDesign(api.state.dragonLevel);
       const config = levelConfig();
       $("#dragon-instruction").textContent = `${design.name}: ${config.targets} shields hidden behind ${config.obstacles} relic walls. Hold to charge, drag to aim, release to burn.`;
@@ -610,7 +612,16 @@
     }
   }
 
+  function previewDragonLevel(event) {
+    const level = Number(event.target.value || 1);
+    api.state.dragonLevel = level;
+    api.saveState();
+    api.updateRealm();
+    restartPhaserDragon();
+  }
+
   window.addEventListener("load", startPhaserDragon);
   $("#restart-dragon")?.addEventListener("click", () => setTimeout(restartPhaserDragon, 0));
   $("#play-dragon-again")?.addEventListener("click", () => setTimeout(restartPhaserDragon, 0));
+  $("#dragon-level-select")?.addEventListener("change", previewDragonLevel);
 })();
