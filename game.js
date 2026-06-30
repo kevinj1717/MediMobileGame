@@ -73,8 +73,8 @@ function shuffled(values) {
 }
 
 function sortLevelConfig(level) {
-  const colors = Math.min(7, 4 + Math.floor((level - 1) / 2));
-  const emptyTowers = level >= 6 ? 3 : 2;
+  const colors = Math.min(6, 4 + Math.floor((level - 1) / 3));
+  const emptyTowers = 2;
   return {
     level,
     colors,
