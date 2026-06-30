@@ -3,6 +3,13 @@
   const BOARD_H = 570;
   const launcher = { x: 195, y: 94 };
   const baseAimAngle = Math.PI / 2;
+  const playfield = {
+    left: 34,
+    right: 356,
+    top: 28,
+    bottom: 548,
+    clearY: 184
+  };
   const api = window.shatteredRealm;
   const $ = (selector) => document.querySelector(selector);
 
@@ -29,23 +36,41 @@
   }
 
   function generateLayout(config) {
-    const slots = [];
-    const rows = [
-      { y: 124, count: 4, minX: 64, maxX: 326 },
-      { y: 200, count: 3, minX: 103, maxX: 287 },
-      { y: 278, count: 4, minX: 58, maxX: 332 },
-      { y: 358, count: 3, minX: 108, maxX: 282 },
-      { y: 438, count: 4, minX: 65, maxX: 325 }
+    const patterns = [
+      [
+        [72, 205], [318, 205],
+        [130, 270], [260, 270],
+        [76, 340], [195, 340], [314, 340],
+        [126, 420], [264, 420],
+        [92, 494], [195, 494], [298, 494]
+      ],
+      [
+        [195, 205],
+        [104, 250], [286, 250],
+        [82, 320], [195, 320], [308, 320],
+        [124, 390], [266, 390],
+        [72, 472], [195, 472], [318, 472]
+      ],
+      [
+        [91, 214], [299, 214],
+        [144, 276], [246, 276],
+        [76, 342], [195, 352], [314, 342],
+        [114, 424], [276, 424],
+        [80, 500], [195, 486], [310, 500]
+      ],
+      [
+        [120, 210], [270, 210],
+        [80, 278], [195, 284], [310, 278],
+        [118, 352], [272, 352],
+        [76, 430], [195, 430], [314, 430],
+        [128, 500], [262, 500]
+      ]
     ];
-    rows.forEach((row) => {
-      for (let i = 0; i < row.count; i++) {
-        const t = row.count === 1 ? .5 : i / (row.count - 1);
-        slots.push({
-          x: row.minX + (row.maxX - row.minX) * t + Phaser.Math.Between(-14, 14),
-          y: row.y + Phaser.Math.Between(-14, 14)
-        });
-      }
-    });
+    const pattern = patterns[(api.state.dragonLevel - 1) % patterns.length];
+    const slots = pattern.map(([x, y]) => ({
+      x: Phaser.Math.Clamp(x + Phaser.Math.Between(-7, 7), playfield.left + 22, playfield.right - 22),
+      y: Math.max(playfield.clearY, y + Phaser.Math.Between(-6, 6))
+    }));
     Phaser.Utils.Array.Shuffle(slots);
     return slots.slice(0, config.targets + config.obstacles).map((slot, index) => ({
       ...slot,
@@ -168,7 +193,7 @@
         const key = slot.target ? "shieldIntact" : "relic";
         const sprite = this.add.image(slot.x, slot.y, key)
           .setDepth(slot.y)
-          .setScale(slot.target ? .185 : .125);
+          .setScale(slot.target ? .148 : .098);
         sprite.setPipeline("Light2D");
         this.tweens.add({
           targets: sprite,
@@ -181,7 +206,7 @@
         this.pegs.push({
           x: slot.x,
           y: slot.y,
-          r: slot.target ? 25 : 17,
+          r: slot.target ? 20 : 14,
           target: slot.target,
           hp: slot.target ? config.targetHp : 1,
           hit: false,
@@ -215,7 +240,7 @@
     moveAim(pointer) {
       if (!this.aiming || this.gameOver) return;
       this.aim.x = Phaser.Math.Clamp(pointer.x, 18, BOARD_W - 18);
-      this.aim.y = Phaser.Math.Clamp(pointer.y, 100, BOARD_H - 40);
+      this.aim.y = Phaser.Math.Clamp(pointer.y, launcher.y + 46, playfield.bottom - 22);
       this.drawAim();
       this.updateLauncherAim();
     }
@@ -258,7 +283,7 @@
         vy += .045;
         x += vx;
         y += vy;
-        if (x < 8 || x > BOARD_W - 8 || y > BOARD_H - 15) break;
+        if (x < playfield.left || x > playfield.right || y < playfield.top || y > playfield.bottom) break;
         if (i % 2 === 0) this.aimGraphics.lineTo(x, y);
       }
       this.aimGraphics.strokePath();
@@ -270,11 +295,11 @@
       const dy = Math.max(48, this.aim.y - launcher.y);
       const len = Math.hypot(dx, dy) || 1;
       const speed = 2.35 + power * 2.35;
-      this.ball = this.add.image(launcher.x, launcher.y, "fireball").setScale(.12).setDepth(999);
+      this.ball = this.add.image(launcher.x, launcher.y, "fireball").setScale(.105).setDepth(999);
       this.ball.setPipeline("Light2D");
       this.ball.vx = dx / len * speed;
       this.ball.vy = dy / len * speed;
-      this.ball.r = 12;
+      this.ball.r = 10;
       this.ball.frames = 0;
       this.ballsLeft--;
       this.aiming = false;
@@ -325,8 +350,19 @@
         }
       });
 
-      if (ball.x < ball.r) { ball.x = ball.r; ball.vx = Math.abs(ball.vx) * .96; }
-      if (ball.x > BOARD_W - ball.r) { ball.x = BOARD_W - ball.r; ball.vx = -Math.abs(ball.vx) * .96; }
+      if (ball.x < playfield.left + ball.r) {
+        ball.x = playfield.left + ball.r;
+        ball.vx = Math.abs(ball.vx) * .96;
+      }
+      if (ball.x > playfield.right - ball.r) {
+        ball.x = playfield.right - ball.r;
+        ball.vx = -Math.abs(ball.vx) * .96;
+      }
+      if (ball.y < playfield.top + ball.r) {
+        ball.y = playfield.top + ball.r;
+        ball.vy = Math.abs(ball.vy) * .82;
+        ball.vx *= .985;
+      }
 
       for (const peg of this.pegs) {
         if (peg.hit || peg.cooldown > 0) continue;
@@ -346,7 +382,7 @@
         }
       }
 
-      if (ball.y > BOARD_H + 35 || ball.frames > 1800) {
+      if (ball.y > playfield.bottom + 28 || ball.frames > 1800) {
         ball.destroy();
         this.ball = null;
         const remaining = this.pegs.some((peg) => peg.target && !peg.hit);
@@ -368,7 +404,7 @@
       const burst = this.add.image(peg.x, peg.y, burstKey).setScale(.08).setAlpha(.95).setDepth(1200);
       this.tweens.add({
         targets: burst,
-        scale: peg.target ? .34 : .22,
+        scale: peg.target ? .26 : .18,
         alpha: 0,
         duration: 520,
         ease: "Cubic.Out",
@@ -379,7 +415,7 @@
 
       if (peg.target && !destroyed) {
         peg.sprite.setTexture("shieldCracked");
-        this.tweens.add({ targets: peg.sprite, scale: .205, yoyo: true, duration: 110, ease: "Back.Out" });
+        this.tweens.add({ targets: peg.sprite, scale: .166, yoyo: true, duration: 110, ease: "Back.Out" });
       } else if (destroyed) {
         peg.hit = true;
         peg.sprite.setTexture(peg.target ? "shieldShattered" : "relic");
@@ -393,7 +429,7 @@
           onComplete: () => peg.sprite.setVisible(false)
         });
       } else {
-        this.tweens.add({ targets: peg.sprite, scale: .145, yoyo: true, duration: 110, ease: "Back.Out" });
+        this.tweens.add({ targets: peg.sprite, scale: .112, yoyo: true, duration: 110, ease: "Back.Out" });
       }
       this.updateStats();
     }
