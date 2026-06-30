@@ -45,6 +45,7 @@ const runeSymbols = { red: "◆", blue: "❄", gold: "☀", green: "♧" };
 let towers = [];
 let selectedTower = null;
 let moves = 0;
+let runeMoving = false;
 
 function shuffled(values) {
   const copy = [...values];
@@ -56,12 +57,14 @@ function shuffled(values) {
 }
 
 function newSortGame() {
+  if (runeMoving) return;
   let pile;
   do {
     pile = shuffled(runeColors.flatMap((color) => Array(4).fill(color)));
     towers = [pile.slice(0, 4), pile.slice(4, 8), pile.slice(8, 12), pile.slice(12, 16), [], []];
   } while (towers.slice(0, 4).some((tower) => new Set(tower).size === 1));
   selectedTower = null;
+  runeMoving = false;
   moves = 0;
   $("#moves").textContent = moves;
   $("#sort-message").classList.add("hidden");
@@ -82,7 +85,51 @@ function renderTowers() {
   });
 }
 
-function chooseTower(index) {
+async function animateRuneMove(sourceIndex, destinationIndex) {
+  const board = $("#towers");
+  const towerElements = $$(".tower");
+  const sourceRune = towerElements[sourceIndex].querySelector(".rune:last-child");
+  const destinationTower = towerElements[destinationIndex];
+  if (!sourceRune || !destinationTower) return;
+
+  const start = sourceRune.getBoundingClientRect();
+  const destinationRunes = destinationTower.querySelector(".runes");
+  const destinationRect = destinationRunes.getBoundingClientRect();
+  const destinationCount = towers[destinationIndex].length;
+  const endX = destinationRect.left + (destinationRect.width - start.width) / 2;
+  const endY = destinationRect.bottom - start.height * (destinationCount + 1) - destinationCount;
+  const flyingRune = sourceRune.cloneNode(true);
+  flyingRune.classList.add("flying-rune");
+  flyingRune.style.left = `${start.left}px`;
+  flyingRune.style.top = `${start.top}px`;
+  flyingRune.style.width = `${start.width}px`;
+  flyingRune.style.height = `${start.height}px`;
+  document.body.appendChild(flyingRune);
+  sourceRune.style.visibility = "hidden";
+  board.classList.add("moving");
+
+  await new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      flyingRune.style.transform = `translate(${endX - start.left}px, -38px)`;
+      setTimeout(() => {
+        flyingRune.style.transform = `translate(${endX - start.left}px, ${endY - start.top}px)`;
+      }, 180);
+    });
+    setTimeout(resolve, 520);
+  });
+
+  flyingRune.remove();
+  board.classList.remove("moving");
+}
+
+function showInvalidMove(index) {
+  const tower = $$(".tower")[index];
+  tower.classList.remove("invalid");
+  requestAnimationFrame(() => tower.classList.add("invalid"));
+}
+
+async function chooseTower(index) {
+  if (runeMoving) return;
   if (selectedTower === null) {
     if (!towers[index].length) return;
     selectedTower = index;
@@ -98,9 +145,14 @@ function chooseTower(index) {
   const destination = towers[index];
   const color = source[source.length - 1];
   if (destination.length < 4 && (!destination.length || destination[destination.length - 1] === color)) {
+    runeMoving = true;
+    await animateRuneMove(selectedTower, index);
     destination.push(source.pop());
     moves++;
     $("#moves").textContent = moves;
+    runeMoving = false;
+  } else {
+    showInvalidMove(index);
   }
   selectedTower = null;
   renderTowers();
@@ -117,11 +169,12 @@ function winSort() {
 }
 
 $("#restart-sort").addEventListener("click", newSortGame);
+$("#play-sort-again").addEventListener("click", newSortGame);
 
 // Dragonfire physics
 const canvas = $("#dragon-canvas");
 const ctx = canvas.getContext("2d");
-let pegs, ball, ballsLeft, score, aiming, aimX, aimY, gameOver, animationId;
+let pegs, ball, ballsLeft, score, aiming, aimX, aimY, gameOver, animationId, ballFrames;
 
 function newDragonGame() {
   cancelAnimationFrame(animationId);
@@ -134,6 +187,7 @@ function newDragonGame() {
   ];
   pegs = layout.map(([x, y, target]) => ({ x, y, r: target ? 15 : 11, target: Boolean(target), hit: false, glow: 0 }));
   ball = null;
+  ballFrames = 0;
   ballsLeft = 7;
   score = 0;
   aiming = true;
@@ -175,7 +229,8 @@ function launch(event) {
   const dx = aimX - 195;
   const dy = Math.max(35, aimY - 35);
   const length = Math.hypot(dx, dy);
-  ball = { x: 195, y: 35, vx: dx / length * 6.2, vy: dy / length * 6.2, r: 8, trail: [] };
+  ball = { x: 195, y: 35, vx: dx / length * 3.2, vy: dy / length * 3.2, r: 8, trail: [] };
+  ballFrames = 0;
   ballsLeft--;
   aiming = false;
   updateDragonStats();
@@ -192,13 +247,14 @@ canvas.addEventListener("touchend", (event) => {
 
 function animateDragon() {
   if (!ball) return;
-  for (let step = 0; step < 2; step++) updateBall();
+  updateBall();
   drawDragon();
   if (ball) animationId = requestAnimationFrame(animateDragon);
 }
 
 function updateBall() {
-  ball.vy += 0.105;
+  ballFrames++;
+  ball.vy += 0.055;
   ball.x += ball.vx;
   ball.y += ball.vy;
   ball.trail.push({ x: ball.x, y: ball.y });
@@ -228,7 +284,7 @@ function updateBall() {
     }
   }
 
-  if (ball.y > canvas.height + 20) {
+  if (ball.y > canvas.height + 20 || ballFrames > 1800) {
     ball = null;
     const remaining = pegs.some((peg) => peg.target && !peg.hit);
     if (!remaining) finishDragon(true);
@@ -330,6 +386,7 @@ function drawDragon() {
 }
 
 $("#restart-dragon").addEventListener("click", newDragonGame);
+$("#play-dragon-again").addEventListener("click", newDragonGame);
 window.addEventListener("resize", () => { if ($("#dragon-screen").classList.contains("active")) drawDragon(); });
 
 updateRealm();
