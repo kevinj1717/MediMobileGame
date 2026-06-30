@@ -236,14 +236,17 @@ async function chooseTower(index) {
 function winSort() {
   megaCelebration = true;
   renderTowers();
-  $("#towers").insertAdjacentHTML("beforeend", `<div class="mega-burst" aria-hidden="true">${sortConfig.activeColors.map((color, colorIndex) => `<span class="${color}" style="--mega-index:${colorIndex}">${runeSymbols[color]}</span>`).join("")}</div>`);
+  const megaSymbols = sortConfig.activeColors.flatMap((color, colorIndex) =>
+    Array.from({ length: 2 }, (_, orbitIndex) => `<span class="${color}" style="--mega-index:${(colorIndex * 2) + orbitIndex}; --mega-orbit:${orbitIndex}">${runeSymbols[color]}</span>`)
+  ).join("");
+  $("#towers").insertAdjacentHTML("beforeend", `<div class="mega-burst" aria-hidden="true"><i class="mega-ring one"></i><i class="mega-ring two"></i><i class="mega-rays"></i>${megaSymbols}<em>✦</em><em>✧</em><em>✦</em><em>✧</em><em>✦</em><em>✧</em></div>`);
   state.gold += 75 + state.sortLevel * 25;
   state.sortWon = true;
   if (state.bestMoves === "\u2014" || moves < Number(state.bestMoves)) state.bestMoves = moves;
   state.sortLevel++;
   saveState();
   updateRealm();
-  setTimeout(() => $("#sort-message").classList.remove("hidden"), 1400);
+  setTimeout(() => $("#sort-message").classList.remove("hidden"), 4200);
 }
 
 $("#restart-sort").addEventListener("click", newSortGame);
