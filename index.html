@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#10151d">
+  <title>The Shattered Realm</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="game-shell">
+    <header>
+      <div class="brand">
+        <span class="crown">♛</span>
+        <div>
+          <p class="eyebrow">Chronicles of the Keeper</p>
+          <h1>The Shattered Realm</h1>
+        </div>
+      </div>
+      <div class="resources" aria-label="Realm resources">
+        <span title="Gold">◆ <b id="gold">0</b></span>
+        <span title="Ember">✦ <b id="embers">0</b></span>
+      </div>
+    </header>
+
+    <main>
+      <section id="realm-screen" class="screen active">
+        <div class="hero-card">
+          <div class="moon"></div>
+          <div class="castle castle-large" aria-hidden="true">
+            <i></i><i></i><i></i>
+          </div>
+          <div class="hero-copy">
+            <p class="eyebrow">The Frost Marches</p>
+            <h2>Reclaim Blackthorn Keep</h2>
+            <p>The old banners stir. Restore the sigils, awaken dragonfire, and bring warmth back to the realm.</p>
+          </div>
+        </div>
+
+        <div class="restoration-card">
+          <div class="card-heading">
+            <div>
+              <p class="eyebrow">Restoration</p>
+              <h3>Blackthorn Keep</h3>
+            </div>
+            <strong id="restore-percent">0%</strong>
+          </div>
+          <div class="progress"><span id="restore-bar"></span></div>
+          <div class="milestones">
+            <div id="milestone-1"><span>♜</span><small>Gatehouse</small></div>
+            <div id="milestone-2"><span>⚑</span><small>Banners</small></div>
+            <div id="milestone-3"><span>♛</span><small>Great Hall</small></div>
+          </div>
+        </div>
+
+        <button class="quest-card" data-go="sort-screen">
+          <span class="quest-icon violet">◈</span>
+          <span><small>Trial I</small><b>Runes of Allegiance</b><em>Sort the ancient house sigils</em></span>
+          <strong>›</strong>
+        </button>
+        <button class="quest-card" data-go="dragon-screen">
+          <span class="quest-icon ember">☄</span>
+          <span><small>Trial II</small><b>Dragonfire</b><em>Break the winter shields</em></span>
+          <strong>›</strong>
+        </button>
+      </section>
+
+      <section id="sort-screen" class="screen">
+        <div class="screen-title">
+          <button class="back" data-go="realm-screen" aria-label="Back">‹</button>
+          <div><p class="eyebrow">Trial I</p><h2>Runes of Allegiance</h2></div>
+          <button class="small-button" id="restart-sort">↻</button>
+        </div>
+        <p class="instruction">Gather each house upon a single spire. Tap one tower, then another.</p>
+        <div class="moves-row"><span>Moves <b id="moves">0</b></span><span>Best <b id="best-moves">—</b></span></div>
+        <div id="towers" class="towers" aria-label="Rune sorting board"></div>
+        <div id="sort-message" class="message hidden">
+          <span>♛</span><h3>The houses are united</h3>
+          <p>Blackthorn's gatehouse rises once more.</p>
+          <button data-go="realm-screen">Return to the Realm</button>
+        </div>
+      </section>
+
+      <section id="dragon-screen" class="screen">
+        <div class="screen-title">
+          <button class="back" data-go="realm-screen" aria-label="Back">‹</button>
+          <div><p class="eyebrow">Trial II</p><h2>Dragonfire</h2></div>
+          <button class="small-button" id="restart-dragon">↻</button>
+        </div>
+        <p class="instruction">Aim with your finger. Shatter every blue shield before the flame dies.</p>
+        <div class="dragon-stats">
+          <span>Fireballs <b id="balls-left">7</b></span>
+          <span>Shields <b id="targets-left">8</b></span>
+          <span>Score <b id="dragon-score">0</b></span>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="dragon-canvas" width="390" height="570"></canvas>
+          <div id="dragon-message" class="message canvas-message hidden">
+            <span>☄</span><h3 id="dragon-result">Winter is broken</h3>
+            <p id="dragon-result-copy">The braziers of Blackthorn burn again.</p>
+            <button data-go="realm-screen">Return to the Realm</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav>
+      <button class="nav-button active" data-go="realm-screen"><span>♜</span>Realm</button>
+      <button class="nav-button" data-go="sort-screen"><span>◈</span>Runes</button>
+      <button class="nav-button" data-go="dragon-screen"><span>☄</span>Dragonfire</button>
+    </nav>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
