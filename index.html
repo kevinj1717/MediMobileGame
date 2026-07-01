@@ -10,7 +10,7 @@
   <title>The Shattered Realm</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/shattered-realm-icon.svg">
-  <link rel="stylesheet" href="styles.css?v=41">
+  <link rel="stylesheet" href="styles.css?v=43">
 </head>
 <body>
   <div class="game-shell">
@@ -140,34 +140,34 @@
   </div>
 
   <div id="castle-finale" class="castle-finale hidden" aria-live="polite">
-    <div class="paper-stage">
-      <p class="eyebrow" id="finale-kicker">Castle Claimed</p>
+    <div class="cinematic-panel">
+      <p class="eyebrow" id="finale-kicker">Siege Complete</p>
       <h2 id="finale-title">Blackthorn Keep Falls</h2>
-      <div class="paper-theater" aria-hidden="true">
-        <div class="paper-sky"><i></i><i></i><i></i></div>
-        <div class="paper-mountains"><i></i><i></i><i></i></div>
-        <div class="paper-path"></div>
-        <div class="paper-army">
-          <i></i><i></i><i></i><i></i>
-        </div>
-        <div class="paper-projectiles"><i></i><i></i><i></i></div>
-        <div class="paper-castle">
+      <div class="cinematic-stage" aria-hidden="true">
+        <div class="cinema-sky"><i></i><i></i><i></i></div>
+        <div class="cinema-mist"></div>
+        <div class="cinema-mountains"><i></i><i></i><i></i></div>
+        <div class="cinema-road"></div>
+        <div class="siege-host"><i></i><i></i><i></i><i></i></div>
+        <div class="cinema-dragon"><i></i><b></b></div>
+        <div class="siege-magic"><i></i><i></i><i></i></div>
+        <div class="siege-castle-model">
           <span class="tower left"></span>
           <span class="keep"></span>
           <span class="tower right"></span>
-          <span class="paper-banner"><b></b></span>
+          <span class="claim-banner"><b></b></span>
         </div>
-        <div class="paper-bursts"><i></i><i></i><i></i></div>
-        <div class="travel-party"><i></i><i></i><i></i></div>
-        <div class="next-castle"><i></i><i></i><i></i></div>
+        <div class="impact-bursts"><i></i><i></i><i></i></div>
+        <div class="travel-host"><i></i><i></i><i></i><i></i></div>
+        <div class="destination-castle"><i></i><i></i><i></i></div>
       </div>
       <p id="finale-copy">Your banners rise over the battlements. The host gathers itself for the next march.</p>
       <button id="finale-continue" data-go="realm-screen">Continue the Campaign</button>
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
-  <script src="game.js?v=41"></script>
-  <script src="phaser-dragon.js?v=41"></script>
+  <script src="game.js?v=43"></script>
+  <script src="phaser-dragon.js?v=43"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));

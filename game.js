@@ -50,7 +50,8 @@ const castles = [
     story: "Break the walls, bind the shrines, and reclaim the first banner of the realm.",
     council: "Blackthorn's walls are old, but the wards beneath them still bite. Send rune-keepers to quiet the magic or call dragonfire to crack the shields.",
     runeMission: "Unbind the gate wards",
-    dragonMission: "Shatter the outer shields"
+    dragonMission: "Shatter the outer shields",
+    cinematic: "frost"
   },
   {
     name: "Greywatch Citadel",
@@ -59,7 +60,8 @@ const castles = [
     story: "Ash-veiled towers guard the old trade roads. The siege engines need hotter fire and sharper magic.",
     council: "Greywatch hides its command hall behind oath-runes and emberproof barricades. The army needs both sabotage and fire.",
     runeMission: "Turn the oath-runes",
-    dragonMission: "Burn the ash barricades"
+    dragonMission: "Burn the ash barricades",
+    cinematic: "ash"
   },
   {
     name: "Stormmere Hold",
@@ -68,7 +70,8 @@ const castles = [
     story: "Sea winds batter the battlements while warded shields hide the keep's command hall.",
     council: "Stormmere's sea wards scatter every assault. Anchor the runes, then let the dragon drive fire through the breach.",
     runeMission: "Anchor the sea wards",
-    dragonMission: "Open the harbor breach"
+    dragonMission: "Open the harbor breach",
+    cinematic: "storm"
   },
   {
     name: "Nightspire",
@@ -77,7 +80,8 @@ const castles = [
     story: "The last fortress drinks the stars. Every ember and sigil must strike as one.",
     council: "Nightspire is the final wound in the realm. Every house sigil and every ember must be spent with purpose.",
     runeMission: "Bind the star sigils",
-    dragonMission: "Break the night shields"
+    dragonMission: "Break the night shields",
+    cinematic: "night"
   }
 ];
 
@@ -122,24 +126,24 @@ function addSiegeProgress(amount) {
 function claimedCastleCopy(claimedCastle, source) {
   const nextCastle = currentCastle();
   const sourceLine = source === "runes"
-    ? "Paper sigils whirl across the gate, the last ward snaps, and the siege engines roll forward."
-    : "A paper dragon arcs overhead, fire streaks across the battlements, and the walls split open.";
+    ? "Ancient sigils ignite across the gate, the last ward snaps, and the siege engines surge through the breach."
+    : "Dragonfire rolls over the battlements, the shields burst like sunrise, and the walls split open.";
   if (claimedCastle === nextCastle) {
     return `${sourceLine} Your banner unfurls above ${claimedCastle.name}. The realm bends its knee.`;
   }
-  return `${sourceLine} Your banner unfurls above ${claimedCastle.name}. The road now leads to ${nextCastle.name} in ${nextCastle.region}.`;
+  return `${sourceLine} Your banner unfurls above ${claimedCastle.name}. Scouts mark the road to ${nextCastle.name} in ${nextCastle.region}.`;
 }
 
 function showCastleFinale(claimedCastle, source = "runes") {
   if (!claimedCastle) return;
   const finale = $("#castle-finale");
   const nextCastle = currentCastle();
-  $("#finale-kicker").textContent = source === "runes" ? "Paper Siege · Wards Broken" : "Paper Siege · Walls Broken";
+  $("#finale-kicker").textContent = source === "runes" ? "Siege Complete · Wards Broken" : "Siege Complete · Walls Broken";
   $("#finale-title").textContent = `${claimedCastle.name} Falls`;
   $("#finale-copy").textContent = claimedCastleCopy(claimedCastle, source);
   finale.classList.remove("hidden");
-  finale.classList.remove("ember-finale", "rune-finale", "traveling");
-  finale.classList.add(source === "dragon" ? "ember-finale" : "rune-finale");
+  finale.classList.remove("ember-finale", "rune-finale", "traveling", "env-frost", "env-ash", "env-storm", "env-night");
+  finale.classList.add(source === "dragon" ? "ember-finale" : "rune-finale", `env-${claimedCastle.cinematic || "frost"}`);
   setTimeout(() => {
     if (finale.classList.contains("hidden")) return;
     finale.classList.add("traveling");
@@ -149,7 +153,9 @@ function showCastleFinale(claimedCastle, source = "runes") {
       $("#finale-copy").textContent = "The last banner flies. The roads are quiet, the fires are warm, and the realm remembers your name.";
     } else {
       $("#finale-title").textContent = `March to ${nextCastle.name}`;
-      $("#finale-copy").textContent = `The army folds its paper tents and follows the road into ${nextCastle.region}. A harder siege waits beyond the hills.`;
+      $("#finale-copy").textContent = `The host rides beneath storm-lit banners toward ${nextCastle.region}. ${nextCastle.name} rises ahead with new walls, new wards, and a harder siege.`;
+      finale.classList.remove("env-frost", "env-ash", "env-storm", "env-night");
+      finale.classList.add(`env-${nextCastle.cinematic || "frost"}`);
     }
   }, 5200);
 }
