@@ -1,4 +1,26 @@
-﻿const state = {
+﻿const saveKeys = [
+  "realmGold",
+  "realmEmbers",
+  "realmSigils",
+  "castleIndex",
+  "siegePower",
+  "claimedCastles",
+  "sortWon",
+  "dragonWon",
+  "bestMoves",
+  "sortLevel",
+  "dragonLevel"
+];
+
+const urlParams = new URLSearchParams(location.search);
+if (urlParams.get("reset") === "1") {
+  saveKeys.forEach((key) => localStorage.removeItem(key));
+  urlParams.delete("reset");
+  const cleanQuery = urlParams.toString();
+  location.replace(`${location.pathname}${cleanQuery ? `?${cleanQuery}` : ""}`);
+}
+
+const state = {
   gold: Number(localStorage.getItem("realmGold") || 0),
   embers: Number(localStorage.getItem("realmEmbers") || 0),
   sigils: Number(localStorage.getItem("realmSigils") || 0),
@@ -12,7 +34,7 @@
   dragonLevel: Number(localStorage.getItem("dragonLevel") || 1)
 };
 
-const sortLevelPreview = Number(new URLSearchParams(location.search).get("sortLevel"));
+const sortLevelPreview = Number(urlParams.get("sortLevel"));
 if (Number.isFinite(sortLevelPreview) && sortLevelPreview > 0) state.sortLevel = Math.min(99, Math.floor(sortLevelPreview));
 
 const $ = (selector) => document.querySelector(selector);
