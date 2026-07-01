@@ -58,7 +58,7 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
 .resources span { padding: 6px 7px; border: 1px solid #4a5667; background: linear-gradient(180deg, #1d2734dd, #0f151edd); border-radius: 20px; color: var(--gold); font-size: 10.5px; box-shadow: inset 0 1px 0 #ffffff14, 0 7px 18px #0005; }
 .resources b { color: var(--ink); margin-left: 2px; }
 
-.screen { display: none; height: calc(100dvh - clamp(56px, 9dvh, 72px) - 74px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); animation: enter .3s ease; overflow: hidden; }
+.screen { display: none; height: calc(100dvh - clamp(56px, 9dvh, 72px) - env(safe-area-inset-top) - env(safe-area-inset-bottom)); animation: enter .3s ease; overflow: hidden; }
 .screen.active { display: block; }
 #realm-screen.active { display: flex; flex-direction: column; gap: clamp(7px, 1.2dvh, 12px); }
 @keyframes enter { from { opacity: 0; transform: translateY(5px); } }
@@ -148,7 +148,7 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
 
 .rune-board-wrap {
   position: relative;
-  height: calc(100% - clamp(52px, 8dvh, 64px) - 72px);
+  height: calc(100% - clamp(52px, 8dvh, 64px));
   width: auto;
   max-width: 100%;
   aspect-ratio: 390/570;
@@ -539,7 +539,7 @@ header { height: clamp(56px, 9dvh, 72px); display: flex; align-items: center; ju
 
 .dragon-stats { gap: 5px; margin-bottom: clamp(5px, 1dvh, 9px); }
 .dragon-stats span { padding: 6px 8px; }
-.canvas-wrap { position: relative; height: calc(100% - clamp(52px, 8dvh, 64px) - 74px); width: auto; max-width: 100%; aspect-ratio: 390/570; margin: auto; border: 1px solid #536073; border-radius: 19px; overflow: hidden; background: #101925; box-shadow: inset 0 0 55px #0009, 0 18px 45px #0008, 0 0 0 1px #ffffff08; }
+.canvas-wrap { position: relative; height: calc(100% - clamp(52px, 8dvh, 64px)); width: auto; max-width: 100%; aspect-ratio: 390/570; margin: auto; border: 1px solid #536073; border-radius: 19px; overflow: hidden; background: #101925; box-shadow: inset 0 0 55px #0009, 0 18px 45px #0008, 0 0 0 1px #ffffff08; }
 canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 #phaser-dragon-game { position: absolute; inset: 0; z-index: 1; display: none; touch-action: none; }
 #phaser-dragon-game canvas { width: 100% !important; height: 100% !important; display: block; }
@@ -733,16 +733,6 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
   100% { transform: scale(1.06) translateX(0); filter: saturate(1.02) brightness(.98); }
 }
 @keyframes routeDraw { to { clip-path: inset(0 0 0 0); } }
-nav {
-  position: fixed; z-index: 20; width: min(100%, 430px); left: 50%; bottom: 0; transform: translateX(-50%);
-  height: calc(64px + env(safe-area-inset-bottom)); padding: 5px 35px env(safe-area-inset-bottom);
-  display: flex; justify-content: space-between; border-top: 1px solid #303946; background: linear-gradient(180deg, #16202cf2, #0b1017f8); backdrop-filter: blur(15px);
-  box-shadow: 0 -14px 30px #0008;
-}
-.nav-button { border: 0; color: #78828e; background: none; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; cursor: pointer; transition: color .2s ease, transform .2s ease; }
-.nav-button span { display: block; margin-bottom: 3px; font-size: 22px; }
-.nav-button.active { color: var(--gold); transform: translateY(-1px); text-shadow: 0 0 15px #d9ae5577; }
-
 @media (max-height: 720px) {
   .game-shell { padding-inline: 10px; }
   .hero-card { min-height: 164px; }

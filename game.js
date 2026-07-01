@@ -237,7 +237,6 @@ function updateRealm() {
 
 function showScreen(id) {
   $$(".screen").forEach((screen) => screen.classList.toggle("active", screen.id === id));
-  $$(".nav-button").forEach((button) => button.classList.toggle("active", button.dataset.go === id));
   window.scrollTo(0, 0);
 }
 
@@ -454,7 +453,6 @@ function winSort() {
 }
 
 $("#restart-sort").addEventListener("click", newSortGame);
-$("#play-sort-again").addEventListener("click", newSortGame);
 
 // Dragonfire physics
 const canvas = $("#dragon-canvas");
@@ -1170,7 +1168,6 @@ function drawDragon() {
 }
 
 $("#restart-dragon").addEventListener("click", newDragonGame);
-$("#play-dragon-again").addEventListener("click", newDragonGame);
 window.addEventListener("resize", () => { if ($("#dragon-screen").classList.contains("active")) drawDragon(); });
 
 window.shatteredRealm = {
