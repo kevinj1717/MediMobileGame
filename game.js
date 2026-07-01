@@ -235,7 +235,22 @@ function updateRealm() {
   $("#dragon-preview").textContent = `${dragonLevelSummary(state.dragonLevel)} \u00b7 +${dragonSiegeReward()} embers for the siege`;
 }
 
+function prepareGameEntry(id) {
+  if (id === "sort-screen" && state.sortWon) {
+    state.sortWon = false;
+    saveState();
+    newSortGame();
+  }
+  if (id === "dragon-screen" && state.dragonWon) {
+    state.dragonWon = false;
+    saveState();
+    newDragonGame();
+    window.restartPhaserDragonLevel?.();
+  }
+}
+
 function showScreen(id) {
+  prepareGameEntry(id);
   $$(".screen").forEach((screen) => screen.classList.toggle("active", screen.id === id));
   window.scrollTo(0, 0);
 }

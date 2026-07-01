@@ -667,6 +667,7 @@
     }
   }
 
+  window.restartPhaserDragonLevel = restartPhaserDragon;
   window.addEventListener("load", startPhaserDragon);
   $("#restart-dragon")?.addEventListener("click", () => setTimeout(restartPhaserDragon, 0));
 })();
