@@ -1,10 +1,12 @@
-const CACHE_NAME = "shattered-realm-v43";
+const CACHE_NAME = "shattered-realm-v44";
 const ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=43",
-  "./game.js?v=43",
-  "./phaser-dragon.js?v=43",
+  "./styles.css?v=44",
+  "./game.js?v=44",
+  "./phaser-dragon.js?v=44",
+  "./assets/cinematics/siege-frost-v1.png",
+  "./assets/cinematics/travel-ash-v1.png",
   "./assets/phaser/rune-board-v1.jpg",
   "./assets/phaser/rune-shrine-v1.png",
   "./assets/phaser/rune-red-v2.png",

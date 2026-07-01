@@ -10,7 +10,7 @@
   <title>The Shattered Realm</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/shattered-realm-icon.svg">
-  <link rel="stylesheet" href="styles.css?v=43">
+  <link rel="stylesheet" href="styles.css?v=44">
 </head>
 <body>
   <div class="game-shell">
@@ -143,7 +143,10 @@
     <div class="cinematic-panel">
       <p class="eyebrow" id="finale-kicker">Siege Complete</p>
       <h2 id="finale-title">Blackthorn Keep Falls</h2>
-      <div class="cinematic-stage" aria-hidden="true">
+      <div class="cinematic-stage generated-cinematic" aria-hidden="true">
+        <div class="cinematic-art siege-art"></div>
+        <div class="cinematic-art travel-art"></div>
+        <div class="cinematic-grade"></div>
         <div class="cinema-sky"><i></i><i></i><i></i></div>
         <div class="cinema-mist"></div>
         <div class="cinema-mountains"><i></i><i></i><i></i></div>
@@ -166,8 +169,8 @@
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
-  <script src="game.js?v=43"></script>
-  <script src="phaser-dragon.js?v=43"></script>
+  <script src="game.js?v=44"></script>
+  <script src="phaser-dragon.js?v=44"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
