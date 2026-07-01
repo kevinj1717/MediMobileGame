@@ -642,14 +642,20 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .siege-host i:nth-child(2) { left: 26px; animation-delay: .1s; }
 .siege-host i:nth-child(3) { left: 52px; animation-delay: .2s; }
 .siege-host i:nth-child(4) { left: 78px; animation-delay: .3s; }
-.cinema-dragon { position: absolute; left: -110px; top: 48px; width: 126px; height: 54px; opacity: 0; filter: drop-shadow(0 0 16px #ff8a35aa); animation: dragonSweep 6.2s ease-in-out both; }
-.cinema-dragon i { position: absolute; left: 36px; top: 22px; width: 54px; height: 18px; border-radius: 50% 45% 35% 50%; background: linear-gradient(90deg, #0a0d14, #273142); }
-.cinema-dragon i::before, .cinema-dragon i::after { content: ""; position: absolute; top: -24px; width: 54px; height: 42px; background: linear-gradient(145deg, #121827, #384254); clip-path: polygon(0 100%, 50% 0, 100% 100%, 48% 72%); transform-origin: bottom center; animation: wingBeat .5s ease-in-out infinite alternate; }
-.cinema-dragon i::before { left: -32px; transform: rotate(-16deg); }
-.cinema-dragon i::after { right: -32px; transform: rotate(16deg) scaleX(-1); }
-.cinema-dragon b { position: absolute; right: -58px; top: 26px; width: 86px; height: 18px; border-radius: 999px; background: linear-gradient(90deg, #fff0a8, #ff8a35 42%, transparent); opacity: 0; animation: dragonBreath 6.2s ease-in-out both; }
-.rune-finale .cinema-dragon { filter: drop-shadow(0 0 18px #b78cffaa); }
-.rune-finale .cinema-dragon b { background: linear-gradient(90deg, #ffffff, #b78cff 42%, transparent); }
+.gate-flare { position: absolute; z-index: 7; right: 116px; bottom: 92px; width: 96px; height: 106px; border-radius: 50%; background: radial-gradient(circle, #fff1a8 0 12%, #ff9a32bb 30%, #ff441a45 48%, transparent 70%); filter: blur(2px) drop-shadow(0 0 28px #ff8a35); opacity: 0; animation: gateBreachFlare 7.4s ease-in-out both; }
+.banner-glow { position: absolute; z-index: 7; right: 58px; top: 32px; width: 78px; height: 92px; background: radial-gradient(circle, #ffe8a855, #f4c16d22 35%, transparent 70%); opacity: 0; filter: blur(4px); animation: bannerGlowRise 7.4s ease-in-out both; }
+.ward-cracks i { position: absolute; z-index: 8; right: 142px; bottom: 118px; width: 96px; height: 3px; border-radius: 999px; background: linear-gradient(90deg, transparent, #fff6c9, #ff8a35, transparent); box-shadow: 0 0 14px #ff9a35; opacity: 0; transform-origin: right center; animation: wardCrack 7.2s ease-in-out both; }
+.ward-cracks i:nth-child(1) { transform: rotate(-28deg); }
+.ward-cracks i:nth-child(2) { bottom: 146px; right: 126px; transform: rotate(12deg); animation-delay: .25s; }
+.ward-cracks i:nth-child(3) { bottom: 100px; right: 106px; transform: rotate(34deg); animation-delay: .45s; }
+.rune-finale .ward-cracks i { background: linear-gradient(90deg, transparent, #ffffff, #b98cff, transparent); box-shadow: 0 0 16px #b98cff; }
+.ember-storm i { position: absolute; z-index: 8; bottom: 44px; left: calc(12% + var(--ember-x) * 12%); width: 5px; height: 5px; border-radius: 50%; background: #ffd27a; box-shadow: 0 0 10px #ff8a35; opacity: 0; animation: emberRise 4.8s ease-in-out infinite; }
+.ember-storm i:nth-child(1) { --ember-x: 0; animation-delay: .1s; }
+.ember-storm i:nth-child(2) { --ember-x: 1; animation-delay: .7s; }
+.ember-storm i:nth-child(3) { --ember-x: 2; animation-delay: 1.2s; }
+.ember-storm i:nth-child(4) { --ember-x: 3; animation-delay: .35s; }
+.ember-storm i:nth-child(5) { --ember-x: 4; animation-delay: 1.6s; }
+.ember-storm i:nth-child(6) { --ember-x: 5; animation-delay: 2.1s; }
 .siege-magic i { position: absolute; left: 112px; bottom: 146px; width: 15px; height: 15px; border-radius: 50%; background: #ff9c3a; box-shadow: 0 0 22px #ff7a24; opacity: 0; animation: cinematicShot 6.3s ease-in-out both; }
 .rune-finale .siege-magic i { background: #b98cff; box-shadow: 0 0 24px #b98cff; }
 .siege-magic i:nth-child(2) { animation-delay: .38s; bottom: 124px; }
@@ -676,9 +682,10 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 @keyframes mistDrift { to { transform: translateX(45px); opacity: .65; } }
 @keyframes soldierBob { to { transform: translateY(-4px); } }
 @keyframes hostAdvance { 0% { transform: translateX(-48px); } 42%, 100% { transform: translateX(38px); } }
-@keyframes dragonSweep { 0%, 8% { opacity: 0; transform: translate(-50px, 12px) scale(.85); } 18% { opacity: .92; } 48% { opacity: .92; transform: translate(260px, -12px) scale(1.03); } 62%, 100% { opacity: 0; transform: translate(360px, -18px) scale(.9); } }
-@keyframes wingBeat { to { transform: rotate(0deg) scaleY(.78); } }
-@keyframes dragonBreath { 0%, 22% { opacity: 0; transform: scaleX(.2); } 31%, 44% { opacity: .95; transform: scaleX(1); } 56%, 100% { opacity: 0; transform: scaleX(.2); } }
+@keyframes gateBreachFlare { 0%, 18% { opacity: 0; transform: scale(.45); } 32% { opacity: .95; transform: scale(1.1); } 52% { opacity: .58; transform: scale(.85); } 72%, 100% { opacity: .18; transform: scale(1.2); } }
+@keyframes bannerGlowRise { 0%, 50% { opacity: 0; transform: translateY(16px) scale(.8); } 68%, 100% { opacity: .85; transform: translateY(0) scale(1); } }
+@keyframes wardCrack { 0%, 22% { opacity: 0; clip-path: inset(0 100% 0 0); } 38% { opacity: 1; clip-path: inset(0 0 0 0); } 58%, 100% { opacity: 0; clip-path: inset(0 0 0 100%); } }
+@keyframes emberRise { 0% { opacity: 0; transform: translateY(0) scale(.4); } 20% { opacity: .95; } 100% { opacity: 0; transform: translateY(-190px) translateX(28px) scale(1.1); } }
 @keyframes cinematicShot { 0%, 18% { opacity: 0; transform: translate(0, 0) scale(.8); } 30% { opacity: 1; } 46%, 100% { opacity: 0; transform: translate(140px, -38px) scale(1.35); } }
 @keyframes cinematicBurst { 0%, 35% { opacity: 0; transform: scale(.25); } 43% { opacity: 1; transform: scale(1.4); } 58%, 100% { opacity: 0; transform: scale(.5); } }
 @keyframes castleHitCinematic { 0%, 34% { transform: rotate(0) scale(1); filter: drop-shadow(0 18px 16px #000b); } 38% { transform: rotate(-1.2deg) scale(1.01); filter: drop-shadow(0 18px 16px #000b) brightness(1.2); } 42% { transform: rotate(1deg); } 52%, 100% { transform: rotate(0); } }
@@ -700,23 +707,32 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .generated-cinematic .travel-host,
 .generated-cinematic .destination-castle { display: none; }
 .generated-cinematic .cinema-mist { z-index: 4; bottom: 24px; height: 95px; opacity: .8; }
-.generated-cinematic .cinema-dragon { z-index: 5; top: 45px; transform: scale(.82); mix-blend-mode: screen; }
 .generated-cinematic .siege-magic, .generated-cinematic .impact-bursts { position: relative; z-index: 6; }
 .generated-cinematic .siege-magic i { left: 52px; bottom: 124px; width: 18px; height: 18px; }
 .generated-cinematic .impact-bursts i { right: 83px; bottom: 136px; width: 62px; height: 62px; }
 .generated-cinematic .impact-bursts i:nth-child(2) { right: 120px; bottom: 105px; }
 .generated-cinematic .impact-bursts i:nth-child(3) { right: 52px; bottom: 170px; }
+.travel-route { position: absolute; z-index: 7; left: 72px; right: 58px; bottom: 76px; height: 74px; opacity: 0; pointer-events: none; }
+.travel-route i { position: absolute; left: 0; right: 0; bottom: 16px; height: 4px; border-radius: 999px; background: linear-gradient(90deg, transparent, #f6c66f, #ff8a35, transparent); box-shadow: 0 0 16px #f6c66f; clip-path: inset(0 100% 0 0); }
+.travel-route::before { content: ""; position: absolute; left: -5px; bottom: 8px; width: 16px; height: 16px; border-radius: 50%; background: #f6c66f; box-shadow: 0 0 18px #f6c66f; }
+.travel-route::after { content: ""; position: absolute; right: -4px; bottom: 8px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #f6c66f; box-shadow: 0 0 18px #f6c66f; }
 .castle-finale.traveling .siege-art { opacity: 0; transform: scale(1.08) translateX(-4%); transition: opacity 1s ease, transform 1s ease; }
 .castle-finale.traveling .travel-art { opacity: 1; transform: scale(1.03) translateX(0); transition: opacity 1s ease, transform 6s ease; }
 .castle-finale.traveling .cinematic-grade { background: radial-gradient(circle at 80% 22%, #ff9b3b26, transparent 24%), radial-gradient(circle at 48% 78%, transparent 35%, #00000070 100%), linear-gradient(90deg, #0000003d, transparent 32% 76%, #00000045); }
-.castle-finale.traveling .cinema-dragon,
+.castle-finale.traveling .travel-route { opacity: 1; transition: opacity .9s ease .5s; }
+.castle-finale.traveling .travel-route i { animation: routeDraw 3.2s ease .6s both; }
 .castle-finale.traveling .siege-magic,
-.castle-finale.traveling .impact-bursts { opacity: 0; transition: opacity .65s ease; }
+.castle-finale.traveling .impact-bursts,
+.castle-finale.traveling .gate-flare,
+.castle-finale.traveling .banner-glow,
+.castle-finale.traveling .ward-cracks,
+.castle-finale.traveling .ember-storm { opacity: 0; transition: opacity .65s ease; }
 @keyframes siegeCamera {
   0% { transform: scale(1.1) translateX(-2%); filter: saturate(.95) brightness(.95); }
   48% { transform: scale(1.03) translateX(1%); filter: saturate(1.06) brightness(1.03); }
   100% { transform: scale(1.06) translateX(0); filter: saturate(1.02) brightness(.98); }
 }
+@keyframes routeDraw { to { clip-path: inset(0 0 0 0); } }
 nav {
   position: fixed; z-index: 20; width: min(100%, 430px); left: 50%; bottom: 0; transform: translateX(-50%);
   height: calc(64px + env(safe-area-inset-bottom)); padding: 5px 35px env(safe-area-inset-bottom);
