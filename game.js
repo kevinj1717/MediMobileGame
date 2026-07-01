@@ -16,6 +16,8 @@ const urlParams = new URLSearchParams(location.search);
 if (urlParams.get("reset") === "1") {
   saveKeys.forEach((key) => localStorage.removeItem(key));
   urlParams.delete("reset");
+  urlParams.delete("primeSiege");
+  urlParams.delete("completeSiege");
   const cleanQuery = urlParams.toString();
   location.replace(`${location.pathname}${cleanQuery ? `?${cleanQuery}` : ""}`);
 }
@@ -150,6 +152,37 @@ function showCastleFinale(claimedCastle, source = "runes") {
       $("#finale-copy").textContent = `The army folds its paper tents and follows the road into ${nextCastle.region}. A harder siege waits beyond the hills.`;
     }
   }, 5200);
+}
+
+function cleanTesterUrl(...keys) {
+  let changed = false;
+  keys.forEach((key) => {
+    if (urlParams.has(key)) {
+      urlParams.delete(key);
+      changed = true;
+    }
+  });
+  if (!changed) return;
+  const cleanQuery = urlParams.toString();
+  history.replaceState(null, "", `${location.pathname}${cleanQuery ? `?${cleanQuery}` : ""}`);
+}
+
+function primeSiegeForTesting() {
+  const castle = currentCastle();
+  const finishingReward = Math.max(runeSiegeReward(), dragonSiegeReward());
+  state.siegePower = Math.max(0, castle.target - finishingReward + 1);
+  saveState();
+  updateRealm();
+  cleanTesterUrl("primeSiege");
+}
+
+function completeSiegeForTesting() {
+  const claimed = addSiegeProgress(currentCastle().target);
+  saveState();
+  updateRealm();
+  showScreen("realm-screen");
+  cleanTesterUrl("completeSiege");
+  setTimeout(() => showCastleFinale(claimed, "dragon"), 450);
 }
 
 function saveState() {
@@ -1152,3 +1185,5 @@ window.shatteredRealm = {
 updateRealm();
 newSortGame();
 newDragonGame();
+if (urlParams.get("primeSiege") === "1") primeSiegeForTesting();
+if (urlParams.get("completeSiege") === "1") completeSiegeForTesting();
