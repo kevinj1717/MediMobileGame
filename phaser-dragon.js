@@ -669,5 +669,4 @@
 
   window.addEventListener("load", startPhaserDragon);
   $("#restart-dragon")?.addEventListener("click", () => setTimeout(restartPhaserDragon, 0));
-  $("#play-dragon-again")?.addEventListener("click", () => setTimeout(restartPhaserDragon, 0));
 })();

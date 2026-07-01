@@ -10,7 +10,7 @@
   <title>The Shattered Realm</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/shattered-realm-icon.svg">
-  <link rel="stylesheet" href="styles.css?v=45">
+  <link rel="stylesheet" href="styles.css?v=46">
 </head>
 <body>
   <div class="game-shell">
@@ -94,8 +94,7 @@
           <span>♛</span><h3>The shrines are attuned</h3>
           <p id="sort-result-copy">The siege camp hums with bound house magic.</p>
           <div class="message-actions">
-            <button id="play-sort-again">Play Again</button>
-            <button class="secondary" data-go="realm-screen">Return to Realm</button>
+            <button data-go="realm-screen">Return to Realm</button>
           </div>
         </div>
       </section>
@@ -124,19 +123,12 @@
             <span>☄</span><h3 id="dragon-result">Winter is broken</h3>
             <p id="dragon-result-copy">The braziers of Blackthorn burn again.</p>
             <div class="message-actions">
-              <button id="play-dragon-again">Play Again</button>
-              <button class="secondary" data-go="realm-screen">Return to Realm</button>
+              <button data-go="realm-screen">Return to Realm</button>
             </div>
           </div>
         </div>
       </section>
     </main>
-
-    <nav>
-      <button class="nav-button active" data-go="realm-screen"><span>♜</span>Realm</button>
-      <button class="nav-button" data-go="sort-screen"><span>◈</span>Runes</button>
-      <button class="nav-button" data-go="dragon-screen"><span>☄</span>Dragonfire</button>
-    </nav>
   </div>
 
   <div id="castle-finale" class="castle-finale hidden" aria-live="polite">
@@ -173,8 +165,8 @@
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
-  <script src="game.js?v=45"></script>
-  <script src="phaser-dragon.js?v=45"></script>
+  <script src="game.js?v=46"></script>
+  <script src="phaser-dragon.js?v=46"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
