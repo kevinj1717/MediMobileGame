@@ -10,7 +10,7 @@
   <title>The Shattered Realm</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/shattered-realm-icon.svg">
-  <link rel="stylesheet" href="styles.css?v=38">
+  <link rel="stylesheet" href="styles.css?v=39">
 </head>
 <body>
   <div class="game-shell">
@@ -61,14 +61,20 @@
           </div>
         </div>
 
+        <div class="war-council-card">
+          <p class="eyebrow">War Council</p>
+          <h3 id="council-title">Choose the next assault</h3>
+          <p id="council-copy">The castle will not fall to strength alone. Bind its wards with runes, then break its shields with dragonfire.</p>
+        </div>
+
         <button class="quest-card" data-go="sort-screen">
           <span class="quest-icon violet">◈</span>
-          <span><small id="sort-tier">Trial I</small><b>Runes of Allegiance</b><em id="sort-preview">Sort the ancient house sigils</em></span>
+          <span><small id="sort-tier">Trial I</small><b id="sort-mission-title">Runes of Allegiance</b><em id="sort-preview">Sort the ancient house sigils</em></span>
           <strong>›</strong>
         </button>
         <button class="quest-card" data-go="dragon-screen">
           <span class="quest-icon ember">☄</span>
-          <span><small id="dragon-tier">Trial II</small><b>Dragonfire</b><em id="dragon-preview">Break the winter shields</em></span>
+          <span><small id="dragon-tier">Trial II</small><b id="dragon-mission-title">Dragonfire</b><em id="dragon-preview">Break the winter shields</em></span>
           <strong>›</strong>
         </button>
       </section>
@@ -132,9 +138,22 @@
       <button class="nav-button" data-go="dragon-screen"><span>☄</span>Dragonfire</button>
     </nav>
   </div>
+
+  <div id="castle-finale" class="castle-finale hidden" aria-live="polite">
+    <div class="finale-sky" aria-hidden="true">
+      <i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+    <div class="finale-card">
+      <p class="eyebrow" id="finale-kicker">Castle Claimed</p>
+      <h2 id="finale-title">Blackthorn Keep Falls</h2>
+      <div class="finale-castle" aria-hidden="true"><i></i><i></i><i></i></div>
+      <p id="finale-copy">Your banners rise over the battlements. The host gathers itself for the next march.</p>
+      <button id="finale-continue" data-go="realm-screen">March Onward</button>
+    </div>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
-  <script src="game.js?v=38"></script>
-  <script src="phaser-dragon.js?v=38"></script>
+  <script src="game.js?v=39"></script>
+  <script src="phaser-dragon.js?v=39"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
