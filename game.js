@@ -1,6 +1,10 @@
 ﻿const state = {
   gold: Number(localStorage.getItem("realmGold") || 0),
   embers: Number(localStorage.getItem("realmEmbers") || 0),
+  sigils: Number(localStorage.getItem("realmSigils") || 0),
+  castleIndex: Number(localStorage.getItem("castleIndex") || 0),
+  siegePower: Number(localStorage.getItem("siegePower") || 0),
+  claimedCastles: Number(localStorage.getItem("claimedCastles") || 0),
   sortWon: localStorage.getItem("sortWon") === "true",
   dragonWon: localStorage.getItem("dragonWon") === "true",
   bestMoves: localStorage.getItem("bestMoves") || "\u2014",
@@ -14,9 +18,72 @@ if (Number.isFinite(sortLevelPreview) && sortLevelPreview > 0) state.sortLevel =
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 
+const castles = [
+  {
+    name: "Blackthorn Keep",
+    region: "The Frost Marches",
+    target: 120,
+    story: "Break the walls, bind the shrines, and reclaim the first banner of the realm."
+  },
+  {
+    name: "Greywatch Citadel",
+    region: "The Ashen Vale",
+    target: 165,
+    story: "Ash-veiled towers guard the old trade roads. The siege engines need hotter fire and sharper magic."
+  },
+  {
+    name: "Stormmere Hold",
+    region: "The Broken Coast",
+    target: 215,
+    story: "Sea winds batter the battlements while warded shields hide the keep's command hall."
+  },
+  {
+    name: "Nightspire",
+    region: "The Crownless North",
+    target: 280,
+    story: "The last fortress drinks the stars. Every ember and sigil must strike as one."
+  }
+];
+
+function currentCastle() {
+  return castles[Math.min(state.castleIndex, castles.length - 1)];
+}
+
+function castleDifficultyBonus() {
+  return Math.min(6, state.castleIndex * 2);
+}
+
+function runeSiegeReward(level = state.sortLevel) {
+  return 24 + (state.castleIndex * 6) + Math.floor(level * 1.5);
+}
+
+function dragonSiegeReward(level = state.dragonLevel) {
+  return 32 + (state.castleIndex * 8) + Math.floor(level * 2);
+}
+
+function addSiegeProgress(amount) {
+  const castle = currentCastle();
+  state.siegePower += amount;
+  if (state.siegePower < castle.target) return null;
+
+  const claimedCastle = castle;
+  state.claimedCastles = Math.max(state.claimedCastles, state.castleIndex + 1);
+  if (state.castleIndex < castles.length - 1) {
+    state.castleIndex++;
+    state.siegePower = 0;
+  } else {
+    state.siegePower = castle.target;
+  }
+  return claimedCastle;
+}
+
 function saveState() {
   localStorage.setItem("realmGold", state.gold);
   localStorage.setItem("realmEmbers", state.embers);
+  localStorage.setItem("realmSigils", state.sigils);
+  localStorage.setItem("castleIndex", state.castleIndex);
+  localStorage.setItem("siegePower", state.siegePower);
+  localStorage.setItem("claimedCastles", state.claimedCastles);
   localStorage.setItem("sortWon", state.sortWon);
   localStorage.setItem("dragonWon", state.dragonWon);
   localStorage.setItem("bestMoves", state.bestMoves);
@@ -25,21 +92,28 @@ function saveState() {
 }
 
 function updateRealm() {
-  const renown = Math.max(1, Math.floor((state.sortLevel + state.dragonLevel) / 2));
+  const castle = currentCastle();
+  const renown = Math.max(1, state.claimedCastles + 1);
+  const progress = Math.min(100, Math.round((state.siegePower / castle.target) * 100));
   $("#renown").textContent = renown;
   $("#gold").textContent = state.gold;
   $("#embers").textContent = state.embers;
+  $("#sigils").textContent = state.sigils;
   $("#best-moves").textContent = state.bestMoves;
-  const progress = Math.min(100, ((state.sortLevel - 1) * 8) + ((state.dragonLevel - 1) * 8) + (state.sortWon ? 15 : 0) + (state.dragonWon ? 15 : 0));
+  $("#realm-region").textContent = castle.region;
+  $("#castle-name").textContent = `Siege ${castle.name}`;
+  $("#castle-copy").textContent = castle.story;
+  $("#siege-castle").textContent = castle.name;
   $("#restore-percent").textContent = `${progress}%`;
   $("#restore-bar").style.width = `${progress}%`;
+  $("#siege-status").textContent = `${Math.min(state.siegePower, castle.target)} / ${castle.target} siege power`;
   $("#milestone-1").classList.toggle("complete", progress >= 34);
   $("#milestone-2").classList.toggle("complete", progress >= 67);
   $("#milestone-3").classList.toggle("complete", progress >= 100);
   $("#sort-tier").textContent = `Trial I \u00b7 Level ${state.sortLevel}`;
   $("#dragon-tier").textContent = `Trial II \u00b7 Level ${state.dragonLevel}`;
-  $("#sort-preview").textContent = sortLevelSummary(state.sortLevel);
-  $("#dragon-preview").textContent = dragonLevelSummary(state.dragonLevel);
+  $("#sort-preview").textContent = `${sortLevelSummary(state.sortLevel)} \u00b7 +${runeSiegeReward()} sigils`;
+  $("#dragon-preview").textContent = `${dragonLevelSummary(state.dragonLevel)} \u00b7 +${dragonSiegeReward()} embers`;
 }
 
 function showScreen(id) {
@@ -75,7 +149,8 @@ function shuffled(values) {
 }
 
 function sortLevelConfig(level) {
-  const colors = Math.min(6, 4 + Math.floor((level - 1) / 3));
+  const effectiveLevel = level + castleDifficultyBonus();
+  const colors = Math.min(6, 4 + Math.floor((effectiveLevel - 1) / 3));
   const emptyTowers = 2;
   return {
     level,
@@ -240,10 +315,16 @@ function winSort() {
     Array.from({ length: 2 }, (_, orbitIndex) => `<span class="${color}" style="--mega-index:${(colorIndex * 2) + orbitIndex}; --mega-orbit:${orbitIndex}">${runeSymbols[color]}</span>`)
   ).join("");
   $("#towers").insertAdjacentHTML("beforeend", `<div class="mega-burst" aria-hidden="true"><i class="mega-ring one"></i><i class="mega-ring two"></i><i class="mega-rays"></i>${megaSymbols}<em>✦</em><em>✧</em><em>✦</em><em>✧</em><em>✦</em><em>✧</em></div>`);
-  state.gold += 75 + state.sortLevel * 25;
+  const reward = runeSiegeReward();
+  const claimed = addSiegeProgress(reward);
+  state.sigils += reward;
+  state.gold += 75 + state.sortLevel * 20;
   state.sortWon = true;
   if (state.bestMoves === "\u2014" || moves < Number(state.bestMoves)) state.bestMoves = moves;
   state.sortLevel++;
+  $("#sort-result-copy").textContent = claimed
+    ? `${claimed.name} is claimed. The army raises your banner and marches toward ${currentCastle().name}.`
+    : `+${reward} siege sigils pulse through the war camp. ${currentCastle().name} is ${Math.min(100, Math.round((state.siegePower / currentCastle().target) * 100))}% broken.`;
   saveState();
   updateRealm();
   setTimeout(() => $("#sort-message").classList.remove("hidden"), 4200);
@@ -270,12 +351,13 @@ function randomRange(min, max) {
 }
 
 function dragonLevelConfig(level) {
+  const effectiveLevel = level + castleDifficultyBonus();
   return {
     level,
-    targets: Math.min(12, 6 + Math.floor(level * .8)),
-    obstacles: Math.min(14, 8 + Math.floor(level * 1.05)),
-    balls: Math.min(13, 9 + Math.floor((level - 1) / 3)),
-    targetHp: Math.min(3, 1 + Math.floor(level / 5))
+    targets: Math.min(12, 6 + Math.floor(effectiveLevel * .8)),
+    obstacles: Math.min(14, 8 + Math.floor(effectiveLevel * 1.05)),
+    balls: Math.min(13, 9 + Math.floor((effectiveLevel - 1) / 3)),
+    targetHp: Math.min(3, 1 + Math.floor(effectiveLevel / 5))
   };
 }
 
@@ -553,12 +635,17 @@ function updateParticles() {
 function finishDragon(won) {
   gameOver = true;
   $("#dragon-result").textContent = won ? "Winter is broken" : "The shields endure";
-  $("#dragon-result-copy").textContent = won ? "The braziers of Blackthorn burn again." : "The dragon circles. Call it back for another assault.";
+  $("#dragon-result-copy").textContent = won ? "The siege engines glow with fresh dragonfire." : "The dragon circles. Call it back for another assault.";
   if (won) {
-    state.embers += 50 + state.dragonLevel * 25;
+    const reward = dragonSiegeReward();
+    const claimed = addSiegeProgress(reward);
+    state.embers += reward;
     state.gold += 25 + state.dragonLevel * 10;
     state.dragonWon = true;
     state.dragonLevel++;
+    $("#dragon-result-copy").textContent = claimed
+      ? `${claimed.name} falls under dragonfire. Your host marches toward ${currentCastle().name}.`
+      : `+${reward} embers fuel the siege. ${currentCastle().name} is ${Math.min(100, Math.round((state.siegePower / currentCastle().target) * 100))}% broken.`;
     saveState();
     updateRealm();
   }
@@ -968,6 +1055,10 @@ window.shatteredRealm = {
   updateRealm,
   dragonLevelConfig,
   dragonLevelSummary,
+  runeSiegeReward,
+  dragonSiegeReward,
+  addSiegeProgress,
+  currentCastle,
   randomRange,
   shuffled
 };
