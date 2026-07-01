@@ -10,7 +10,7 @@
   <title>The Shattered Realm</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/shattered-realm-icon.svg">
-  <link rel="stylesheet" href="styles.css?v=36">
+  <link rel="stylesheet" href="styles.css?v=37">
 </head>
 <body>
   <div class="game-shell">
@@ -26,6 +26,7 @@
         <span title="Renown">♛ <b id="renown">1</b></span>
         <span title="Gold">◆ <b id="gold">0</b></span>
         <span title="Ember">✦ <b id="embers">0</b></span>
+        <span title="Sigils">◇ <b id="sigils">0</b></span>
       </div>
     </header>
 
@@ -37,25 +38,26 @@
             <i></i><i></i><i></i>
           </div>
           <div class="hero-copy">
-            <p class="eyebrow">The Frost Marches</p>
-            <h2>Reclaim Blackthorn Keep</h2>
-            <p>The old banners stir. Restore the sigils, awaken dragonfire, and bring warmth back to the realm.</p>
+            <p class="eyebrow" id="realm-region">The Frost Marches</p>
+            <h2 id="castle-name">Siege Blackthorn Keep</h2>
+            <p id="castle-copy">Break the walls, bind the shrines, and reclaim the first banner of the realm.</p>
           </div>
         </div>
 
         <div class="restoration-card">
           <div class="card-heading">
             <div>
-              <p class="eyebrow">Restoration</p>
-              <h3>Blackthorn Keep</h3>
+              <p class="eyebrow">Siege Effort</p>
+              <h3 id="siege-castle">Blackthorn Keep</h3>
             </div>
             <strong id="restore-percent">0%</strong>
           </div>
           <div class="progress"><span id="restore-bar"></span></div>
+          <p class="siege-status" id="siege-status">0 / 120 siege power</p>
           <div class="milestones">
-            <div id="milestone-1"><span>♜</span><small>Gatehouse</small></div>
-            <div id="milestone-2"><span>⚑</span><small>Banners</small></div>
-            <div id="milestone-3"><span>♛</span><small>Great Hall</small></div>
+            <div id="milestone-1"><span>♜</span><small>Outer Wall</small></div>
+            <div id="milestone-2"><span>⚑</span><small>Gatehouse</small></div>
+            <div id="milestone-3"><span>♛</span><small>Keep Claimed</small></div>
           </div>
         </div>
 
@@ -84,7 +86,7 @@
         </div>
         <div id="sort-message" class="message hidden">
           <span>♛</span><h3>The shrines are attuned</h3>
-          <p>Blackthorn's gatehouse hums with bound house magic.</p>
+          <p id="sort-result-copy">The siege camp hums with bound house magic.</p>
           <div class="message-actions">
             <button id="play-sort-again">Play Again</button>
             <button class="secondary" data-go="realm-screen">Return to Realm</button>
@@ -131,8 +133,8 @@
     </nav>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
-  <script src="game.js?v=36"></script>
-  <script src="phaser-dragon.js?v=36"></script>
+  <script src="game.js?v=37"></script>
+  <script src="phaser-dragon.js?v=37"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));

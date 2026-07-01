@@ -619,12 +619,17 @@
     finish(won) {
       this.gameOver = true;
       $("#dragon-result").textContent = won ? "Winter is broken" : "The shields endure";
-      $("#dragon-result-copy").textContent = won ? "The braziers of Blackthorn burn again." : "The dragon circles. Call it back for another assault.";
+      $("#dragon-result-copy").textContent = won ? "The siege engines glow with fresh dragonfire." : "The dragon circles. Call it back for another assault.";
       if (won) {
-        api.state.embers += 50 + api.state.dragonLevel * 25;
+        const reward = api.dragonSiegeReward();
+        const claimed = api.addSiegeProgress(reward);
+        api.state.embers += reward;
         api.state.gold += 25 + api.state.dragonLevel * 10;
         api.state.dragonWon = true;
         api.state.dragonLevel++;
+        $("#dragon-result-copy").textContent = claimed
+          ? `${claimed.name} falls under dragonfire. Your host marches toward ${api.currentCastle().name}.`
+          : `+${reward} embers fuel the siege. ${api.currentCastle().name} is ${Math.min(100, Math.round((api.state.siegePower / api.currentCastle().target) * 100))}% broken.`;
         api.saveState();
         api.updateRealm();
       }
