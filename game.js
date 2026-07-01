@@ -120,23 +120,36 @@ function addSiegeProgress(amount) {
 function claimedCastleCopy(claimedCastle, source) {
   const nextCastle = currentCastle();
   const sourceLine = source === "runes"
-    ? "The last ward snaps, and the gatehouse opens from within."
-    : "Dragonfire rolls across the battlements until the shields burst like sunrise.";
+    ? "Paper sigils whirl across the gate, the last ward snaps, and the siege engines roll forward."
+    : "A paper dragon arcs overhead, fire streaks across the battlements, and the walls split open.";
   if (claimedCastle === nextCastle) {
-    return `${sourceLine} ${claimedCastle.name} is yours, and the realm bends its knee to your banner.`;
+    return `${sourceLine} Your banner unfurls above ${claimedCastle.name}. The realm bends its knee.`;
   }
-  return `${sourceLine} ${claimedCastle.name} is yours. Scouts already point toward ${nextCastle.name} in ${nextCastle.region}.`;
+  return `${sourceLine} Your banner unfurls above ${claimedCastle.name}. The road now leads to ${nextCastle.name} in ${nextCastle.region}.`;
 }
 
 function showCastleFinale(claimedCastle, source = "runes") {
   if (!claimedCastle) return;
   const finale = $("#castle-finale");
-  $("#finale-kicker").textContent = source === "runes" ? "Wards Broken" : "Walls Broken";
+  const nextCastle = currentCastle();
+  $("#finale-kicker").textContent = source === "runes" ? "Paper Siege · Wards Broken" : "Paper Siege · Walls Broken";
   $("#finale-title").textContent = `${claimedCastle.name} Falls`;
   $("#finale-copy").textContent = claimedCastleCopy(claimedCastle, source);
   finale.classList.remove("hidden");
-  finale.classList.remove("ember-finale", "rune-finale");
+  finale.classList.remove("ember-finale", "rune-finale", "traveling");
   finale.classList.add(source === "dragon" ? "ember-finale" : "rune-finale");
+  setTimeout(() => {
+    if (finale.classList.contains("hidden")) return;
+    finale.classList.add("traveling");
+    $("#finale-kicker").textContent = "Interlude · On the Road";
+    if (nextCastle === claimedCastle) {
+      $("#finale-title").textContent = "The Realm Is Yours";
+      $("#finale-copy").textContent = "The last banner flies. The roads are quiet, the fires are warm, and the realm remembers your name.";
+    } else {
+      $("#finale-title").textContent = `March to ${nextCastle.name}`;
+      $("#finale-copy").textContent = `The army folds its paper tents and follows the road into ${nextCastle.region}. A harder siege waits beyond the hills.`;
+    }
+  }, 5200);
 }
 
 function saveState() {

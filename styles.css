@@ -569,69 +569,100 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
   inset: 0;
   display: grid;
   place-items: center;
-  padding: 24px;
-  background: radial-gradient(circle at 50% 32%, #f7c86f28, transparent 24%), radial-gradient(circle at 18% 78%, #9d6dff22, transparent 30%), linear-gradient(180deg, #050912e8, #09111df6 48%, #07080df8);
+  padding: 18px;
+  background: radial-gradient(circle at 50% 18%, #f3d07c24, transparent 26%), linear-gradient(180deg, #070b14ed, #10192af8 52%, #07090ff8);
   backdrop-filter: blur(5px);
   animation: finaleIn .35s ease both;
 }
 .castle-finale.hidden { display: none; }
-.finale-sky { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.finale-sky i {
-  position: absolute;
-  left: calc(12% + (var(--spark, 0) * 13%));
-  bottom: -24px;
-  width: 7px;
-  height: 90px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, transparent, #f6c66f, #fff2b5);
-  box-shadow: 0 0 24px #f6b14f;
-  animation: finaleRocket 1.55s ease-out infinite;
-}
-.finale-sky i:nth-child(1) { --spark: 0; animation-delay: .05s; }
-.finale-sky i:nth-child(2) { --spark: 1; animation-delay: .32s; }
-.finale-sky i:nth-child(3) { --spark: 2; animation-delay: .66s; }
-.finale-sky i:nth-child(4) { --spark: 3; animation-delay: .18s; }
-.finale-sky i:nth-child(5) { --spark: 4; animation-delay: .82s; }
-.finale-sky i:nth-child(6) { --spark: 5; animation-delay: .48s; }
-.finale-card {
-  position: relative;
-  width: min(340px, 92vw);
-  padding: 25px 21px 22px;
-  border: 1px solid #d4a85e;
+.paper-stage {
+  width: min(382px, 94vw);
+  padding: 17px 15px 16px;
+  border: 1px solid #d2ae6b;
   border-radius: 24px;
+  background: linear-gradient(180deg, #30263af5, #151d2af7 68%, #111016f7);
+  box-shadow: inset 0 2px 0 #ffffff20, 0 26px 72px #000d, 0 0 44px #d9ae5530;
   text-align: center;
-  background: linear-gradient(180deg, #263241f4, #111823f7), radial-gradient(circle at 50% 0%, #ffd98133, transparent 35%);
-  box-shadow: inset 0 1px 0 #ffffff24, 0 28px 70px #000c, 0 0 48px #d9a94933;
-  overflow: hidden;
-  animation: finaleCardRise .55s cubic-bezier(.2, 1.1, .25, 1) both;
 }
-.finale-card::before {
+.paper-stage h2 { margin: 5px 0 12px; font: 800 22px Cinzel, serif; text-shadow: 0 0 18px #f6d07a66; }
+.paper-stage p:not(.eyebrow) { margin: 12px 2px 14px; color: #dce5ee; font-size: 12px; line-height: 1.42; }
+.paper-stage button { padding: 11px 18px; border: 1px solid #f1c979; border-radius: 999px; color: #17110a; background: linear-gradient(#ffe6a3, #b87e32); box-shadow: 0 9px 22px #0007, 0 0 18px #f6c66f44; font-weight: 900; }
+.paper-theater {
+  position: relative;
+  height: 292px;
+  overflow: hidden;
+  border: 2px solid #6d567d;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #253853 0 42%, #7f6b58 43% 55%, #4a342b 56% 100%);
+  box-shadow: inset 0 0 0 2px #ffffff10, inset 0 -30px 42px #0006;
+}
+.paper-theater::after {
   content: "";
   position: absolute;
-  inset: -25%;
-  background: conic-gradient(from 90deg, transparent, #f3c66d22, transparent, #9d6dff18, transparent);
-  animation: finaleAura 5s linear infinite;
+  inset: 0;
+  background: linear-gradient(90deg, #ffffff10, transparent 16% 84%, #00000018), repeating-linear-gradient(0deg, transparent 0 10px, #00000008 10px 11px);
+  pointer-events: none;
+  mix-blend-mode: soft-light;
 }
-.finale-card > * { position: relative; }
-.finale-card h2 { margin: 5px 0 10px; font: 800 24px Cinzel, serif; text-shadow: 0 0 18px #f6c66f55; }
-.finale-card p:not(.eyebrow) { margin: 10px 0 18px; color: #d7e2ec; font-size: 13px; line-height: 1.45; }
-.finale-card button { padding: 12px 20px; border: 1px solid #f4c66e; border-radius: 999px; color: #17110a; background: linear-gradient(#ffe08d, #b98235); box-shadow: 0 8px 22px #0007, 0 0 20px #f6c66f44; font-weight: 800; }
-.finale-castle { position: relative; display: flex; justify-content: center; align-items: end; height: 78px; margin: 9px auto 7px; filter: drop-shadow(0 13px 14px #0009); }
-.finale-castle i { position: relative; width: 45px; height: 58px; margin: 0 -3px; border: 1px solid #d5b16a99; border-radius: 5px 5px 0 0; background: linear-gradient(180deg, #59667a, #1b2432 70%, #0d121a); box-shadow: inset 0 2px 0 #ffffff18, 0 0 22px #f6c66f22; animation: castleClaimPulse 1.45s ease-in-out infinite; }
-.finale-castle i:nth-child(2) { width: 58px; height: 76px; z-index: 2; }
-.finale-castle i::before { content: ""; position: absolute; left: -4px; right: -4px; top: -9px; height: 12px; background: repeating-linear-gradient(90deg, #d5b16a 0 9px, transparent 9px 14px); }
-.rune-finale .finale-card { box-shadow: inset 0 1px 0 #ffffff24, 0 28px 70px #000c, 0 0 54px #a66dff55; }
-.ember-finale .finale-card { box-shadow: inset 0 1px 0 #ffffff24, 0 28px 70px #000c, 0 0 54px #ff8a355a; }
+.paper-sky i { position: absolute; width: 28px; height: 28px; border-radius: 50%; background: #f8d98b; box-shadow: 0 0 22px #f8d98b88; }
+.paper-sky i:nth-child(1) { left: 26px; top: 25px; }
+.paper-sky i:nth-child(2), .paper-sky i:nth-child(3) { width: 46px; height: 14px; border-radius: 999px; background: #d8e5eeaa; box-shadow: 0 4px 0 #0002; animation: paperCloud 9s linear infinite; }
+.paper-sky i:nth-child(2) { left: -50px; top: 52px; }
+.paper-sky i:nth-child(3) { left: -80px; top: 86px; animation-delay: 2.5s; }
+.paper-mountains i { position: absolute; bottom: 124px; width: 142px; height: 92px; background: #435069; clip-path: polygon(50% 0, 100% 100%, 0 100%); filter: drop-shadow(0 7px 0 #0003); }
+.paper-mountains i:nth-child(1) { left: -25px; }
+.paper-mountains i:nth-child(2) { left: 75px; bottom: 130px; background: #596276; }
+.paper-mountains i:nth-child(3) { right: -30px; }
+.paper-path { position: absolute; left: -30px; right: -30px; bottom: -12px; height: 105px; background: #b08b58; clip-path: polygon(0 58%, 38% 25%, 58% 42%, 100% 18%, 100% 100%, 0 100%); box-shadow: inset 0 11px 0 #e2bd76, inset 0 -18px 0 #6c4935; }
+.paper-castle { position: absolute; right: 28px; bottom: 90px; width: 136px; height: 118px; filter: drop-shadow(0 14px 0 #0005); animation: paperCastleShake 5.1s ease-in-out both; }
+.paper-castle span { position: absolute; bottom: 0; background: linear-gradient(180deg, #c8c0aa, #817b75); border: 2px solid #5d514b; box-shadow: inset 0 4px 0 #fff3, 4px 5px 0 #0002; }
+.paper-castle .tower { width: 36px; height: 86px; border-radius: 5px 5px 0 0; }
+.paper-castle .left { left: 0; }
+.paper-castle .right { right: 0; }
+.paper-castle .keep { left: 31px; width: 74px; height: 104px; border-radius: 6px 6px 0 0; }
+.paper-castle span::before { content: ""; position: absolute; left: -4px; right: -4px; top: -10px; height: 13px; background: repeating-linear-gradient(90deg, #d4c8a9 0 9px, transparent 9px 14px); filter: drop-shadow(0 2px 0 #5d514b); }
+.paper-banner { left: 66px; bottom: 104px !important; width: 6px; height: 50px; border: 0 !important; background: #3b2a20 !important; box-shadow: 2px 2px 0 #0003 !important; transform-origin: bottom; animation: bannerPole 6.5s ease both; }
+.paper-banner::before { display: none; }
+.paper-banner b { position: absolute; left: 6px; top: 4px; width: 0; height: 31px; border-radius: 0 5px 5px 0; background: linear-gradient(135deg, #f2c76d, #8e2538 55%, #4d1220); box-shadow: 3px 4px 0 #0003; animation: bannerUnfurl 6.5s ease both; }
+.paper-banner b::after { content: "♛"; position: absolute; left: 9px; top: 7px; color: #ffe5a0; font-size: 12px; opacity: 0; animation: bannerMark 6.5s ease both; }
+.paper-army { position: absolute; left: 17px; bottom: 72px; width: 95px; height: 62px; animation: armyMarch 6.8s ease-in-out both; }
+.paper-army i, .travel-party i { position: absolute; bottom: 0; width: 18px; height: 34px; background: linear-gradient(180deg, #efc76f, #743642); clip-path: polygon(50% 0, 75% 18%, 75% 100%, 25% 100%, 25% 18%); box-shadow: 3px 4px 0 #0003; animation: paperBob .45s ease-in-out infinite alternate; }
+.paper-army i:nth-child(1) { left: 0; }
+.paper-army i:nth-child(2) { left: 23px; animation-delay: .1s; }
+.paper-army i:nth-child(3) { left: 46px; animation-delay: .2s; }
+.paper-army i:nth-child(4) { left: 69px; animation-delay: .3s; }
+.paper-projectiles i { position: absolute; left: 112px; bottom: 148px; width: 12px; height: 12px; border-radius: 50%; background: #ffb34c; box-shadow: 0 0 18px #ff7a24; opacity: 0; animation: paperShot 6.5s ease-in-out both; }
+.rune-finale .paper-projectiles i { background: #b78cff; box-shadow: 0 0 18px #b78cff; }
+.paper-projectiles i:nth-child(2) { animation-delay: .35s; bottom: 130px; }
+.paper-projectiles i:nth-child(3) { animation-delay: .7s; bottom: 166px; }
+.paper-bursts i { position: absolute; right: 112px; bottom: 154px; width: 32px; height: 32px; background: #ffcf72; clip-path: polygon(50% 0, 61% 35%, 100% 24%, 72% 52%, 100% 78%, 62% 68%, 50% 100%, 38% 68%, 0 78%, 28% 52%, 0 24%, 39% 35%); opacity: 0; filter: drop-shadow(0 0 12px #ff8a35); animation: paperBurst 6.5s ease-in-out both; }
+.rune-finale .paper-bursts i { background: #c9a2ff; filter: drop-shadow(0 0 12px #a66dff); }
+.paper-bursts i:nth-child(2) { right: 65px; bottom: 128px; animation-delay: .45s; }
+.paper-bursts i:nth-child(3) { right: 92px; bottom: 184px; animation-delay: .9s; }
+.travel-party { position: absolute; left: -90px; bottom: 44px; width: 78px; height: 38px; opacity: 0; animation: travelMarch 3.1s ease-in-out 5.5s both; }
+.travel-party i:nth-child(1) { left: 0; }
+.travel-party i:nth-child(2) { left: 22px; animation-delay: .1s; }
+.travel-party i:nth-child(3) { left: 44px; animation-delay: .2s; }
+.next-castle { position: absolute; right: -90px; bottom: 70px; width: 62px; height: 70px; opacity: 0; animation: nextCastleIn 2.2s ease 5.55s both; filter: drop-shadow(0 9px 0 #0004); }
+.next-castle i { position: absolute; bottom: 0; width: 19px; height: 48px; background: #6f7484; border: 2px solid #3e4350; }
+.next-castle i:nth-child(1) { left: 0; }
+.next-castle i:nth-child(2) { left: 17px; width: 28px; height: 66px; }
+.next-castle i:nth-child(3) { right: 0; }
+.castle-finale.traveling .paper-castle, .castle-finale.traveling .paper-army, .castle-finale.traveling .paper-projectiles, .castle-finale.traveling .paper-bursts { opacity: .25; transition: opacity .7s ease; }
+.ember-finale .paper-stage { box-shadow: inset 0 2px 0 #ffffff20, 0 26px 72px #000d, 0 0 48px #ff8a3544; }
+.rune-finale .paper-stage { box-shadow: inset 0 2px 0 #ffffff20, 0 26px 72px #000d, 0 0 48px #a66dff55; }
 @keyframes finaleIn { from { opacity: 0; } }
-@keyframes finaleCardRise { from { opacity: 0; transform: translateY(20px) scale(.94); } }
-@keyframes finaleAura { to { transform: rotate(1turn); } }
-@keyframes finaleRocket {
-  0% { transform: translateY(0) scaleY(.35); opacity: 0; }
-  22% { opacity: 1; }
-  72% { transform: translateY(-78vh) scaleY(1); opacity: 1; }
-  100% { transform: translateY(-82vh) scaleY(.2); opacity: 0; }
-}
-@keyframes castleClaimPulse { 50% { transform: translateY(-3px); box-shadow: inset 0 2px 0 #ffffff22, 0 0 28px #f6c66f55; } }
+@keyframes paperCloud { to { transform: translateX(460px); } }
+@keyframes paperBob { to { transform: translateY(-4px) rotate(-2deg); } }
+@keyframes armyMarch { 0% { transform: translateX(-48px); } 38%, 100% { transform: translateX(38px); } }
+@keyframes paperShot { 0%, 18% { opacity: 0; transform: translate(0, 0) scale(.8); } 30% { opacity: 1; } 46%, 100% { opacity: 0; transform: translate(135px, -40px) scale(1.25); } }
+@keyframes paperBurst { 0%, 35% { opacity: 0; transform: scale(.2) rotate(0deg); } 43% { opacity: 1; transform: scale(1.25) rotate(18deg); } 56%, 100% { opacity: 0; transform: scale(.35) rotate(70deg); } }
+@keyframes paperCastleShake { 0%, 34% { transform: rotate(0); } 38% { transform: rotate(-1.8deg); } 42% { transform: rotate(1.5deg); } 46% { transform: rotate(-1deg); } 52%, 100% { transform: rotate(0); } }
+@keyframes bannerPole { 0%, 55% { transform: scaleY(0); } 66%, 100% { transform: scaleY(1); } }
+@keyframes bannerUnfurl { 0%, 65% { width: 0; } 78%, 100% { width: 48px; } }
+@keyframes bannerMark { 0%, 75% { opacity: 0; } 86%, 100% { opacity: 1; } }
+@keyframes travelMarch { 0% { opacity: 0; transform: translateX(0); } 12% { opacity: 1; } 100% { opacity: 1; transform: translateX(285px); } }
+@keyframes nextCastleIn { 0% { opacity: 0; transform: translateX(0) scale(.86); } 100% { opacity: .9; transform: translateX(-92px) scale(1); } }
 
 nav {
   position: fixed; z-index: 20; width: min(100%, 430px); left: 50%; bottom: 0; transform: translateX(-50%);
