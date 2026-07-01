@@ -628,10 +628,11 @@
         api.state.dragonWon = true;
         api.state.dragonLevel++;
         $("#dragon-result-copy").textContent = claimed
-          ? `${claimed.name} falls under dragonfire. Your host marches toward ${api.currentCastle().name}.`
+          ? `${claimed.name} falls under dragonfire. The host raises your banner and the war council marks the next march.`
           : `+${reward} embers fuel the siege. ${api.currentCastle().name} is ${Math.min(100, Math.round((api.state.siegePower / api.currentCastle().target) * 100))}% broken.`;
         api.saveState();
         api.updateRealm();
+        if (claimed) this.time.delayedCall(900, () => api.showCastleFinale(claimed, "dragon"));
       }
       this.time.delayedCall(350, () => $("#dragon-message").classList.remove("hidden"));
     }

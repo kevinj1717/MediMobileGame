@@ -45,25 +45,37 @@ const castles = [
     name: "Blackthorn Keep",
     region: "The Frost Marches",
     target: 120,
-    story: "Break the walls, bind the shrines, and reclaim the first banner of the realm."
+    story: "Break the walls, bind the shrines, and reclaim the first banner of the realm.",
+    council: "Blackthorn's walls are old, but the wards beneath them still bite. Send rune-keepers to quiet the magic or call dragonfire to crack the shields.",
+    runeMission: "Unbind the gate wards",
+    dragonMission: "Shatter the outer shields"
   },
   {
     name: "Greywatch Citadel",
     region: "The Ashen Vale",
     target: 165,
-    story: "Ash-veiled towers guard the old trade roads. The siege engines need hotter fire and sharper magic."
+    story: "Ash-veiled towers guard the old trade roads. The siege engines need hotter fire and sharper magic.",
+    council: "Greywatch hides its command hall behind oath-runes and emberproof barricades. The army needs both sabotage and fire.",
+    runeMission: "Turn the oath-runes",
+    dragonMission: "Burn the ash barricades"
   },
   {
     name: "Stormmere Hold",
     region: "The Broken Coast",
     target: 215,
-    story: "Sea winds batter the battlements while warded shields hide the keep's command hall."
+    story: "Sea winds batter the battlements while warded shields hide the keep's command hall.",
+    council: "Stormmere's sea wards scatter every assault. Anchor the runes, then let the dragon drive fire through the breach.",
+    runeMission: "Anchor the sea wards",
+    dragonMission: "Open the harbor breach"
   },
   {
     name: "Nightspire",
     region: "The Crownless North",
     target: 280,
-    story: "The last fortress drinks the stars. Every ember and sigil must strike as one."
+    story: "The last fortress drinks the stars. Every ember and sigil must strike as one.",
+    council: "Nightspire is the final wound in the realm. Every house sigil and every ember must be spent with purpose.",
+    runeMission: "Bind the star sigils",
+    dragonMission: "Break the night shields"
   }
 ];
 
@@ -83,6 +95,12 @@ function dragonSiegeReward(level = state.dragonLevel) {
   return 32 + (state.castleIndex * 8) + Math.floor(level * 2);
 }
 
+function siegePhase(progress) {
+  if (progress >= 67) return "The keep is buckling. One decisive strike could bring the banners down.";
+  if (progress >= 34) return "The outer wall is broken. Push through the gatehouse before the defenders rally.";
+  return "The army is forming its first breach. Choose how to weaken the castle.";
+}
+
 function addSiegeProgress(amount) {
   const castle = currentCastle();
   state.siegePower += amount;
@@ -97,6 +115,28 @@ function addSiegeProgress(amount) {
     state.siegePower = castle.target;
   }
   return claimedCastle;
+}
+
+function claimedCastleCopy(claimedCastle, source) {
+  const nextCastle = currentCastle();
+  const sourceLine = source === "runes"
+    ? "The last ward snaps, and the gatehouse opens from within."
+    : "Dragonfire rolls across the battlements until the shields burst like sunrise.";
+  if (claimedCastle === nextCastle) {
+    return `${sourceLine} ${claimedCastle.name} is yours, and the realm bends its knee to your banner.`;
+  }
+  return `${sourceLine} ${claimedCastle.name} is yours. Scouts already point toward ${nextCastle.name} in ${nextCastle.region}.`;
+}
+
+function showCastleFinale(claimedCastle, source = "runes") {
+  if (!claimedCastle) return;
+  const finale = $("#castle-finale");
+  $("#finale-kicker").textContent = source === "runes" ? "Wards Broken" : "Walls Broken";
+  $("#finale-title").textContent = `${claimedCastle.name} Falls`;
+  $("#finale-copy").textContent = claimedCastleCopy(claimedCastle, source);
+  finale.classList.remove("hidden");
+  finale.classList.remove("ember-finale", "rune-finale");
+  finale.classList.add(source === "dragon" ? "ember-finale" : "rune-finale");
 }
 
 function saveState() {
@@ -117,6 +157,7 @@ function updateRealm() {
   const castle = currentCastle();
   const renown = Math.max(1, state.claimedCastles + 1);
   const progress = Math.min(100, Math.round((state.siegePower / castle.target) * 100));
+  const phase = siegePhase(progress);
   $("#renown").textContent = renown;
   $("#gold").textContent = state.gold;
   $("#embers").textContent = state.embers;
@@ -126,6 +167,8 @@ function updateRealm() {
   $("#castle-name").textContent = `Siege ${castle.name}`;
   $("#castle-copy").textContent = castle.story;
   $("#siege-castle").textContent = castle.name;
+  $("#council-title").textContent = `${castle.name} War Council`;
+  $("#council-copy").textContent = `${phase} ${castle.council}`;
   $("#restore-percent").textContent = `${progress}%`;
   $("#restore-bar").style.width = `${progress}%`;
   $("#siege-status").textContent = `${Math.min(state.siegePower, castle.target)} / ${castle.target} siege power`;
@@ -134,8 +177,10 @@ function updateRealm() {
   $("#milestone-3").classList.toggle("complete", progress >= 100);
   $("#sort-tier").textContent = `Trial I \u00b7 Level ${state.sortLevel}`;
   $("#dragon-tier").textContent = `Trial II \u00b7 Level ${state.dragonLevel}`;
-  $("#sort-preview").textContent = `${sortLevelSummary(state.sortLevel)} \u00b7 +${runeSiegeReward()} sigils`;
-  $("#dragon-preview").textContent = `${dragonLevelSummary(state.dragonLevel)} \u00b7 +${dragonSiegeReward()} embers`;
+  $("#sort-mission-title").textContent = castle.runeMission;
+  $("#dragon-mission-title").textContent = castle.dragonMission;
+  $("#sort-preview").textContent = `${sortLevelSummary(state.sortLevel)} \u00b7 +${runeSiegeReward()} sigils for the siege`;
+  $("#dragon-preview").textContent = `${dragonLevelSummary(state.dragonLevel)} \u00b7 +${dragonSiegeReward()} embers for the siege`;
 }
 
 function showScreen(id) {
@@ -146,7 +191,10 @@ function showScreen(id) {
 
 document.addEventListener("click", (event) => {
   const target = event.target.closest("[data-go]");
-  if (target) showScreen(target.dataset.go);
+  if (target) {
+    $("#castle-finale")?.classList.add("hidden");
+    showScreen(target.dataset.go);
+  }
 });
 
 // Rune sorting
@@ -345,10 +393,11 @@ function winSort() {
   if (state.bestMoves === "\u2014" || moves < Number(state.bestMoves)) state.bestMoves = moves;
   state.sortLevel++;
   $("#sort-result-copy").textContent = claimed
-    ? `${claimed.name} is claimed. The army raises your banner and marches toward ${currentCastle().name}.`
+    ? `${claimed.name} is claimed. The host raises your banner and the war council marks the next march.`
     : `+${reward} siege sigils pulse through the war camp. ${currentCastle().name} is ${Math.min(100, Math.round((state.siegePower / currentCastle().target) * 100))}% broken.`;
   saveState();
   updateRealm();
+  if (claimed) setTimeout(() => showCastleFinale(claimed, "runes"), 4700);
   setTimeout(() => $("#sort-message").classList.remove("hidden"), 4200);
 }
 
@@ -666,10 +715,11 @@ function finishDragon(won) {
     state.dragonWon = true;
     state.dragonLevel++;
     $("#dragon-result-copy").textContent = claimed
-      ? `${claimed.name} falls under dragonfire. Your host marches toward ${currentCastle().name}.`
+      ? `${claimed.name} falls under dragonfire. The host raises your banner and the war council marks the next march.`
       : `+${reward} embers fuel the siege. ${currentCastle().name} is ${Math.min(100, Math.round((state.siegePower / currentCastle().target) * 100))}% broken.`;
     saveState();
     updateRealm();
+    if (claimed) setTimeout(() => showCastleFinale(claimed, "dragon"), 900);
   }
   setTimeout(() => $("#dragon-message").classList.remove("hidden"), 350);
 }
@@ -1081,6 +1131,7 @@ window.shatteredRealm = {
   dragonSiegeReward,
   addSiegeProgress,
   currentCastle,
+  showCastleFinale,
   randomRange,
   shuffled
 };
