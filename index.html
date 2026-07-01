@@ -10,7 +10,7 @@
   <title>The Shattered Realm</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/shattered-realm-icon.svg">
-  <link rel="stylesheet" href="styles.css?v=39">
+  <link rel="stylesheet" href="styles.css?v=40">
 </head>
 <body>
   <div class="game-shell">
@@ -140,20 +140,34 @@
   </div>
 
   <div id="castle-finale" class="castle-finale hidden" aria-live="polite">
-    <div class="finale-sky" aria-hidden="true">
-      <i></i><i></i><i></i><i></i><i></i><i></i>
-    </div>
-    <div class="finale-card">
+    <div class="paper-stage">
       <p class="eyebrow" id="finale-kicker">Castle Claimed</p>
       <h2 id="finale-title">Blackthorn Keep Falls</h2>
-      <div class="finale-castle" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="paper-theater" aria-hidden="true">
+        <div class="paper-sky"><i></i><i></i><i></i></div>
+        <div class="paper-mountains"><i></i><i></i><i></i></div>
+        <div class="paper-path"></div>
+        <div class="paper-army">
+          <i></i><i></i><i></i><i></i>
+        </div>
+        <div class="paper-projectiles"><i></i><i></i><i></i></div>
+        <div class="paper-castle">
+          <span class="tower left"></span>
+          <span class="keep"></span>
+          <span class="tower right"></span>
+          <span class="paper-banner"><b></b></span>
+        </div>
+        <div class="paper-bursts"><i></i><i></i><i></i></div>
+        <div class="travel-party"><i></i><i></i><i></i></div>
+        <div class="next-castle"><i></i><i></i><i></i></div>
+      </div>
       <p id="finale-copy">Your banners rise over the battlements. The host gathers itself for the next march.</p>
-      <button id="finale-continue" data-go="realm-screen">March Onward</button>
+      <button id="finale-continue" data-go="realm-screen">Continue the Campaign</button>
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
-  <script src="game.js?v=39"></script>
-  <script src="phaser-dragon.js?v=39"></script>
+  <script src="game.js?v=40"></script>
+  <script src="phaser-dragon.js?v=40"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
